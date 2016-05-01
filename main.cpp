@@ -196,6 +196,7 @@ int main(){
     }
     // ***END PRINT*** //
     std::cout<<"------------------------Begin Draw--------------------------------"<<std::endl;
+    cout<<"Output direction check: "<<result_img<<endl;
     for (int i = 0; i <PicN ; i++){
         //std::cout << "Image Dir:" << PicArray[i] << std::endl;
         Mat src = imread(PicArray[i]);		//read the i th picture
@@ -253,16 +254,18 @@ int main(){
         
         //namedWindow("a");
         //imshow("a",src);
-        string out_dir_new;
+        string out_dir_new, checkdir;
         //cvWaitKey(100);
         out_dir_new=result_img + NumToString2(i+1) + ".jpg";
-        cout<<out_dir_new<<endl;
+        checkdir = NumToString2(i+1) + ".jpg";
+        cout<<checkdir<<"  ";
+        if ((i+1)%7==0) cout<<endl;
         imwrite(out_dir_new,src);
         cvWaitKey(1);
-        //writer << src;
+        writer << src;
     }
-    //writer.release();
-    std::cout<<"-------------------------END-------------------------------"<<std::endl;
+    writer.release();
+    std::cout<<"\n------------------------- END -------------------------------"<<std::endl;
     mypause();
     return 0;
 }
