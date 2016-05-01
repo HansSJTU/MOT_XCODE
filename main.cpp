@@ -169,10 +169,10 @@ int main(){
     pointvarindex.resize(num_frame);
     int num_tracklet=(int) all_tracklet.size();
     for (int i = 0;i <= num_tracklet-1;i++){
-        if (num_tracklet==0) {cout<<"ERROR in <main>: Tracklet number=0!\n"; system("pause"); break;}
+        if (num_tracklet==0) {cout<<"ERROR in <main>: Tracklet number=0!\n"; mypause(); break;}
         int tmp_num=(int)all_tracklet[i].storage.size();
         for (int j=0;j<=tmp_num-1;j++){
-            if (tmp_num==0) {cout<<"Warning in <main>: Tracklet "<<j<<" has no pointvar in it!\n"; system("pause");break;}
+            if (tmp_num==0) {cout<<"Warning in <main>: Tracklet "<<j<<" has no pointvar in it!\n"; mypause();break;}
             //cout<<"tracklet_pool[i].storage[j]->frame: "<<tracklet_pool[i].storage[j]->frame<<'\n';
             trackletindex[all_tracklet[i].storage[j]->frame-1].push_back(i);
             pointvarindex[all_tracklet[i].storage[j]->frame-1].push_back(j);
@@ -181,7 +181,7 @@ int main(){
     // ***Print all tracklet data as frame*** //
     cout<<"****Print all tracklet data by frame : ****\n";
     for (int i=0;i<=num_frame-1;i++){
-        if (num_frame==0) {cout<<"ERROR in <main>: Total Frame number=0!\n";system("pause");break;}
+        if (num_frame==0) {cout<<"ERROR in <main>: Total Frame number=0!\n";mypause();break;}
         int tmp_num=(int) trackletindex[i].size();
         cout<<"Frame Number: "<<i+1<<"\n";
         if(tmp_num==0){

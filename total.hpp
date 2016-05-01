@@ -55,7 +55,7 @@ extern int** permutation_all;
 extern int permutation_all_count;
 extern int last_numtmp;
 
-//all comination (dont change)
+//all combination (dont change)
 extern int** comination_all;
 extern int comination_all_count;
 extern int last_numtmp_comination;
