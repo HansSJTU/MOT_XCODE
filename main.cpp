@@ -46,7 +46,7 @@ int main(){
     const std::string out_dir = passp1 + UN + passp5 + DS + passp6;
     const std::string result_img = passp1 + UN + passp5 + DS + "/";
     const std::string feature_dir = passp1 + UN +passp2 +DS + passp4 + passp7;
-    int PicN = 40;
+    int PicN = 100;
     
     cout<<"Checking <base_dir>   : "<<base_dir<<endl;
     cout<<"Checking <data_dir>   : "<<data_dir<<endl;
@@ -138,6 +138,7 @@ int main(){
         difference=0;
         target_num=(int)DetectionArray[i].size();
         tracklet_num=(int)tracklet_pool.size();
+        if (target_num==0) continue;
         max_object=-10000;
         target_link_flag=new bool[target_num];
         //cout<<"target_num:"<<target_num<<endl;system("pause");

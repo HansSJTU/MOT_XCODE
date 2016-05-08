@@ -440,6 +440,8 @@ void generate_all_possibility(int n,int m){
         }
         comb_main(m,n);
         Perm_main(n);
+        //int t_time=-1;
+        //if (factorial(n)!=0) t_time=A(m,n)/factorial(n)-1;
         for (int i=0;i<=A(m,n)/factorial(n)-1;i++){
             for (int j=0;j<=factorial(n)-1;j++){
                 for (int k=0;k<=n-1;k++){
