@@ -82,7 +82,7 @@ private:
     bool delet;
 public:
     Vector2<double> position;	//t is the center of the detection(width)
-    double Size,trust; //Size is the width
+    double trust; //Size is the width
     int width, height,frame,id;
     bool Use;
     double* apfeature;
@@ -115,7 +115,7 @@ public:
     PointVar(){}
     bool delete_judge(){return delet;}
     ~PointVar(){
-        delete apfeature;
+        delete []apfeature;
     }
 };
 //Tracklet Structure
