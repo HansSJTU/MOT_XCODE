@@ -75,8 +75,10 @@ void CoAppearance_test(){
     tracklet tracklet_tmp;
     //DetectionArray[1][0].print();
     //std::cin.get();
-    tracklet_tmp.storage.push_back(&(DetectionArray[0][0]));
-    double app_f1=CoAppearance(&tracklet_tmp,&DetectionArray[1][0]);
+    tracklet_tmp.storage.push_back(&(DetectionArray[2][1]));
+    //DetectionArray[0][0].print();
+    double app_f1=CoAppearance(&tracklet_tmp,&DetectionArray[3][1]);
+    //DetectionArray[1][0].print();
     cout << app_f1;
 }
 void Comotion_test(){
@@ -195,10 +197,17 @@ double correlation_node(tracklet *track, PointVar *candidate){
     simi_motion=correlation_motion(track,candidate);
     
     simi_app=CoAppearance(track,candidate);
-
-    cout<<"simi_motion: "<<simi_motion<<endl;
-    cout<<"simi_app: "<<simi_app<<endl;
+    simi_app=1/simi_app;
+    cout<<"Frame1: "<<tmp->frame<<"\t\t"<<"Frame2: "<<candidate->frame<<"\t\t";
+    cout.precision(8);
+    cout<<"simi_motion: "<<simi_motion<<"\t\t";
+    if (simi_motion==0) cout<<"\t\t";
+    cout.precision(8);
+    cout<<"simi_app: "<<simi_app;
+    
     result=track->lambda1*simi_motion+track->lambda2*simi_app;
+    //result=simi_app;
+    cout<<"\t\t"<<"simi_all: "<<result<<endl;
     return result;
 }
 void update_relation(std::vector<tracklet> &tracklet_pool){

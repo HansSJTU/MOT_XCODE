@@ -16,7 +16,7 @@ using namespace cv;
 // ************ User name Predefine******* //
 #define USERNAME "Hans"
 //#define USERNAME "River"
-// ************ Pass Predefine *********** //
+// ************ Dataset Predefine *********** //
 //#define Dataset "ADL-Rundle-1"
 //#define Dataset "ADL-Rundle-3"
 //#define Dataset "Town-Center"
@@ -46,7 +46,7 @@ int main(){
     const std::string out_dir = passp1 + UN + passp5 + DS + passp6;
     const std::string result_img = passp1 + UN + passp5 + DS + "/";
     const std::string feature_dir = passp1 + UN +passp2 +DS + passp4 + passp7;
-    int PicN = 200;
+    int PicN = 40;
     
     cout<<"Checking <base_dir>   : "<<base_dir<<endl;
     cout<<"Checking <data_dir>   : "<<data_dir<<endl;
@@ -120,7 +120,7 @@ int main(){
     cout<<"************ End Reading **************\n\n";
     mypause();		//testing the obtained data
     //***************************End Reading Data****************************//
-    //CoAppearance_test();system("pause");
+    //CoAppearance_test();mypause();
     //A_test(5,2);A_test(9,3);A_test(4,4);A_test(3,1);system("pause");
     //Perm_main(4);system("pause");	Perm_main(5);system("pause");	Perm_main(10);system("pause");
     //comb_main(5,3);system("pause");
@@ -153,6 +153,7 @@ int main(){
             if (object_current>max_object)
             {
                 max_object=object_current;
+                
                 optimal_hype=hyp_all[j];
             }
         }
@@ -231,6 +232,7 @@ int main(){
     // ***END PRINT*** //
     std::cout<<"----------------------- Begin Draw --------------------------"<<std::endl;
     cout<<"Output direction check: "<<result_img<<endl;
+    mypause();
     for (int i = 0; i <PicN ; i++){
         //std::cout << "Image Dir:" << PicArray[i] << std::endl;
         Mat src = imread(PicArray[i]);		//read the i th picture
@@ -300,6 +302,5 @@ int main(){
     }
     writer.release();
     std::cout<<"\n------------------------- END -------------------------------"<<std::endl;
-    mypause();
     return 0;
 }
