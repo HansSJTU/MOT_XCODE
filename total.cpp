@@ -19,8 +19,8 @@
 const CvPoint ROI_LeftTop(75,70);
 const CvPoint ROI_RightDown(1190,330);
 
-const CvPoint Border_LeftTop(50,50);
-const CvPoint Border_RightDown(1200,340);
+const CvPoint Border_LeftTop(0,0);
+const CvPoint Border_RightDown(1238,374);
 /********************************/
 
 /********Venice1*************/

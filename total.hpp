@@ -85,6 +85,7 @@ public:
     double Size,trust; //Size is the width
     int width, height,frame,id;
     bool Use;
+    double* apfeature;
     void print(){
         std::cout<<"Frame:"<<frame<<" ID:"<<id<<" x:"<<position.x<<" y:"<<position.y<<" width:"<<width<<" height:"<<height<<'\n';
     }
@@ -106,11 +107,16 @@ public:
         trust=trust1;
         Use=false;
         delet=false;
-        if(width < 10 || height < 10) delet=true;
-        if (! (col > Border_lt.x && col < Border_rd.x && row > Border_lt.y && row < Border_rd.y)) delet=true;
+        apfeature=NULL;
+        //if(width < 10 || height < 10) delet=true;
+        if (! ((int)x1 > Border_lt.x && (int)x1 < Border_rd.x && (int)y1 > Border_lt.y && (int)y1 < Border_rd.y))
+            delet=true;
     }
     PointVar(){}
     bool delete_judge(){return delet;}
+    ~PointVar(){
+        delete apfeature;
+    }
 };
 //Tracklet Structure
 class tracklet{

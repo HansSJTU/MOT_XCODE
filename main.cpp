@@ -40,14 +40,17 @@ int main(){
     string passp4 = "/det/";
     string passp5 = "/Desktop/Xcode_MOT/Result_IMGs/";
     string passp6 = ".avi";
+    string passp7 = "feature.txt";
     const std::string base_dir = passp1 + UN + passp2 + DS + passp3;
     const std::string data_dir = passp1 + UN + passp2 + DS + passp4;
     const std::string out_dir = passp1 + UN + passp5 + DS + passp6;
     const std::string result_img = passp1 + UN + passp5 + DS + "/";
-    int PicN = 20;
+    const std::string feature_dir = passp1 + UN +passp2 +DS + passp4 + passp7;
+    int PicN = 200;
     
-    cout<<"Checking <base_dir>: "<<base_dir<<endl;
-    cout<<"Checking <data_dir>: "<<data_dir<<endl;
+    cout<<"Checking <base_dir>   : "<<base_dir<<endl;
+    cout<<"Checking <data_dir>   : "<<data_dir<<endl;
+    cout<<"Checking <feature_dir>: "<<feature_dir<<endl;
     //***************** Reading data into memory********************//
     cout<<"\n***************** Reading Data *****************\n\n";
     std::vector<string> PicArray;
@@ -57,7 +60,7 @@ int main(){
     Imglist = base_dir + "img_list.txt";
     ifstream fin_data(Txtname);
     ifstream fin_list(Listname);
-    ifstream fin_imglist(Imglist);  //preparing path and filename
+    ifstream fin_imglist(Imglist);      //preparing path and filename
     int totalframe;			//checking the total frames
     fin_imglist>>totalframe;
     if (PicN>totalframe) {
@@ -77,9 +80,40 @@ int main(){
             int frame;
             fin_data>>frame>>x>>y>>width>>height>>trust;		//detection data in
             PointVar tmp(frame,x,y,width,height,trust,j);		//construction
-            if (!tmp.delete_judge())	OneDetection.push_back(tmp);	// delete some detections
+            if (!tmp.delete_judge()){       // delete some detections
+                OneDetection.push_back(tmp);
+            }
         }
         DetectionArray.push_back(OneDetection);
+    }
+    fin_data.close();
+    fin_list.close();
+    //ReadingExam(DetectionArray,PicArray);
+    //mypause();
+    ifstream feature(feature_dir);
+    for (int i=0; i <= DetectionArray.size() - 1 ;i++){
+        for (int j = 0; j <= DetectionArray[i].size() - 1; j++){
+            if (DetectionArray[i].size() == 0) break;
+            double* feature_tmp;
+            feature_tmp=new double[1024];
+            int checkframe,checkid;
+            feature>>checkframe>>checkid;
+            
+            //checking detection feature index
+            if (checkframe != i+1 || checkid != DetectionArray[i][j].id){
+                cout<<"<ERROR in main:reading feature> Detection feature index not matching!\n";
+                cout<<"trueframe: "<<i+1<<"\tcheckframe: "<<checkframe<<endl;
+                cout<<"trueid   : "<<DetectionArray[i][j].id<<"\tcheckid   : "<<checkid<<endl;
+                mypause();
+            }
+            for (int i_tp = 0; i_tp <= 1023; i_tp ++){
+                double writing_tmp;
+                feature>>writing_tmp;
+                //cout<<i_tp<<"\t"<<writing_tmp<<"\n";
+                feature_tmp[i_tp]=writing_tmp;
+            }
+            DetectionArray[i][j].apfeature = feature_tmp;
+        }
     }
     
     ReadingExam(DetectionArray,PicArray);
@@ -153,7 +187,7 @@ int main(){
         all_tracklet.push_back(tracklet_pool[i]);
     }
     
-    // *******************************DRAW RECTANGLE************************************* //
+    // ******************************* DRAW RECTANGLE ************************************* //
     
     std::vector<CvScalar> sVec;
     GetScalar(sVec);	//Get Color Vector
@@ -162,7 +196,7 @@ int main(){
         cout<<"ERROR in <main:VideoWriter>: initial failed!\n\n";
         mypause();
     }
-    std::cout << "\n\n*************************START DRAWING********************** \n\n" ;
+    std::cout << "\n\n************************* START DRAWING ********************** \n\n" ;
     vector<vector<int>> trackletindex;
     vector<vector<int>> pointvarindex;
     trackletindex.resize(num_frame);
@@ -179,7 +213,7 @@ int main(){
         }
     }
     // ***Print all tracklet data as frame*** //
-    cout<<"****Print all tracklet data by frame : ****\n";
+    cout<<"------ Print all tracklet data by frame ------\n\n";
     for (int i=0;i<=num_frame-1;i++){
         if (num_frame==0) {cout<<"ERROR in <main>: Total Frame number=0!\n";mypause();break;}
         int tmp_num=(int) trackletindex[i].size();
@@ -195,7 +229,7 @@ int main(){
         }
     }
     // ***END PRINT*** //
-    std::cout<<"------------------------Begin Draw--------------------------------"<<std::endl;
+    std::cout<<"----------------------- Begin Draw --------------------------"<<std::endl;
     cout<<"Output direction check: "<<result_img<<endl;
     for (int i = 0; i <PicN ; i++){
         //std::cout << "Image Dir:" << PicArray[i] << std::endl;

@@ -76,7 +76,8 @@ void CoAppearance_test(){
     //DetectionArray[1][0].print();
     //std::cin.get();
     tracklet_tmp.storage.push_back(&(DetectionArray[0][0]));
-    double* app_f1=CoAppearance(&tracklet_tmp,&DetectionArray[1][0]);
+    double app_f1=CoAppearance(&tracklet_tmp,&DetectionArray[1][0]);
+    cout << app_f1;
 }
 void Comotion_test(){
 }
@@ -84,77 +85,59 @@ void A_test(int a, int b){
     std::cout<<A(a,b);
 }
 //**************END Test Functions**************//
-double* CoAppearance(tracklet *pre,PointVar *next){
-    int frame1,frame2;
+double CoAppearance(tracklet *pre,PointVar *next){
+    double totalsum=0;
     int trackletsize=(int)pre->storage.size();
-    Rect preR, nextR;
-    preR.x=(int)pre->storage[trackletsize-1]->position.x;
-    preR.y=(int)pre->storage[trackletsize-1]->position.y;
-    preR.height=(int)pre->storage[trackletsize-1]->height;
-    preR.width=(int)pre->storage[trackletsize-1]->width;
-    preR.x -= preR.width/2;
-    preR.y -= preR.width/2;
-    
-    nextR.x = (int)next->position.x;
-    nextR.y= (int)next->position.y;
-    nextR.height=next->height;
-    nextR.width=next->width;
-    nextR.x -= nextR.width/2;
-    nextR.y -= nextR.width/2;
-    
-    frame1=pre->storage[trackletsize-1]->frame;
-    frame2=next->frame;
-    double* coapp;
-    coapp=new double(2);
-    cout<<"                   --------->                     \n";
-    coapp[0]=CalcNodeAppearance(&preR, frame1, &nextR, frame2);
-    cout<<"                   <---------                     \n";
-    coapp[1]=CalcNodeAppearance(&nextR, frame2,&preR, frame1);
-    cout<<coapp[0]<<"\t"<<coapp[1]<<"\n";
-    cout<<"\n";
-    return coapp;
+    double *preap, *nextap;
+    preap=pre->storage[trackletsize-1]->apfeature;
+    nextap=next->apfeature;
+    for (int i=0 ; i <= 1023 ; i ++){
+        totalsum += (preap[i] - nextap[i]) * (preap[i] - nextap[i]);
+    }
+    totalsum = sqrt(totalsum);
+    return totalsum;
 }
-double CalcNodeAppearance(const Rect *preR,int FrameNum1,const Rect *nextR,int FrameNum2){
-    if(!isRectInBorder(preR) || !isRectInBorder(nextR))	//if not inborder, than return
-        return 0;
-    std::cout<<"First frame     :"<<FrameNum1<<" "<<*preR<<"\n";
-    std::cout<<"Second frame    :"<<FrameNum2<<" "<<*nextR<<"\n";
-    std::cout<<"Starting Calculating Appearance...\n";
-    
-    //    mwArray Path(path);
-    //    mwArray r1(1,1,mxDOUBLE_CLASS);
-    //    mwArray c1(1,1,mxDOUBLE_CLASS);
-    //    mwArray h1(1,1,mxDOUBLE_CLASS);
-    //    mwArray w1(1,1,mxDOUBLE_CLASS);
-    //    mwArray frame1(1,1,mxDOUBLE_CLASS);
-    //
-    //    r1(1,1) = preR->y;
-    //    c1(1,1) = preR->x;
-    //    h1(1,1) = preR->height;
-    //    w1(1,1) = preR->width;
-    //    frame1(1,1) = FrameNum1;
-    //
-    //    mwArray r2(1,1,mxDOUBLE_CLASS);
-    //    mwArray c2(1,1,mxDOUBLE_CLASS);
-    //    mwArray h2(1,1,mxDOUBLE_CLASS);
-    //    mwArray w2(1,1,mxDOUBLE_CLASS);
-    //    mwArray frame2(1,1,mxDOUBLE_CLASS);
-    //
-    //    r2(1,1) = nextR->y;
-    //    c2(1,1) = nextR->x;
-    //    h2(1,1) = nextR->height;
-    //    w2(1,1) = nextR->width;
-    //    frame2(1,1) = FrameNum2;
-    //
-    //    mwArray rScore(1,1,mxDOUBLE_CLASS);
-    //
-    //    CalcSimiV2(1,rScore,Path,r1,c1,h1,w1,frame1,r2,c2,h2,w2,frame2);
-    double *score = new double;
-    //    rScore.GetData(score,1);
-    //
-    //    std::cout<<"Appearance Calculating Done\n"<<std::endl;
-    return *score;
-}
+//double CalcNodeAppearance(const Rect *preR,int FrameNum1,const Rect *nextR,int FrameNum2){
+//    if(!isRectInBorder(preR) || !isRectInBorder(nextR))	//if not inborder, than return
+//        return 0;
+//    std::cout<<"First frame     :"<<FrameNum1<<" "<<*preR<<"\n";
+//    std::cout<<"Second frame    :"<<FrameNum2<<" "<<*nextR<<"\n";
+//    std::cout<<"Starting Calculating Appearance...\n";
+//    
+//    //    mwArray Path(path);
+//    //    mwArray r1(1,1,mxDOUBLE_CLASS);
+//    //    mwArray c1(1,1,mxDOUBLE_CLASS);
+//    //    mwArray h1(1,1,mxDOUBLE_CLASS);
+//    //    mwArray w1(1,1,mxDOUBLE_CLASS);
+//    //    mwArray frame1(1,1,mxDOUBLE_CLASS);
+//    //
+//    //    r1(1,1) = preR->y;
+//    //    c1(1,1) = preR->x;
+//    //    h1(1,1) = preR->height;
+//    //    w1(1,1) = preR->width;
+//    //    frame1(1,1) = FrameNum1;
+//    //
+//    //    mwArray r2(1,1,mxDOUBLE_CLASS);
+//    //    mwArray c2(1,1,mxDOUBLE_CLASS);
+//    //    mwArray h2(1,1,mxDOUBLE_CLASS);
+//    //    mwArray w2(1,1,mxDOUBLE_CLASS);
+//    //    mwArray frame2(1,1,mxDOUBLE_CLASS);
+//    //
+//    //    r2(1,1) = nextR->y;
+//    //    c2(1,1) = nextR->x;
+//    //    h2(1,1) = nextR->height;
+//    //    w2(1,1) = nextR->width;
+//    //    frame2(1,1) = FrameNum2;
+//    //
+//    //    mwArray rScore(1,1,mxDOUBLE_CLASS);
+//    //
+//    //    CalcSimiV2(1,rScore,Path,r1,c1,h1,w1,frame1,r2,c2,h2,w2,frame2);
+//    double *score = new double;
+//    //    rScore.GetData(score,1);
+//    //
+//    //    std::cout<<"Appearance Calculating Done\n"<<std::endl;
+//    return *score;
+//}
 bool isRectInBorder(const Rect *r){
     int x1 = r->x;
     int y1 = r->y;
@@ -205,14 +188,14 @@ double correlation_node(tracklet *track, PointVar *candidate){
     int size;
     PointVar* tmp;
     double simi_motion,result,simi_app;
-    double* simi_apprc;
+
     size=(int)track->storage.size();
     tmp=track->storage[size-1];
     
     simi_motion=correlation_motion(track,candidate);
     
-    simi_apprc=CoAppearance(track,candidate);
-    simi_app=sqrt(simi_apprc[0]*simi_apprc[1]);
+    simi_app=CoAppearance(track,candidate);
+
     cout<<"simi_motion: "<<simi_motion<<endl;
     cout<<"simi_app: "<<simi_app<<endl;
     result=track->lambda1*simi_motion+track->lambda2*simi_app;

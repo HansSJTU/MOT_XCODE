@@ -28,8 +28,8 @@ double GetDistance(Point t1,Point t2);
 //exchange int to string(add 0) (not used)
 std::string NumToString2(int i);
 //calculate appearance corelation
-double* CoAppearance(tracklet *pre, PointVar *next);//top api
-double CalcNodeAppearance(const Rect *preR,int FrameNum1,const Rect *nextR,int FrameNum2);
+double CoAppearance(tracklet *pre, PointVar *next);//top api
+//double CalcNodeAppearance(const Rect *preR,int FrameNum1,const Rect *nextR,int FrameNum2);
 //used function in CalcNodeAppearance
 bool isRectInBorder(const Rect *r);
 bool InBorder(Point t);
