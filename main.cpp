@@ -14,8 +14,8 @@
 using namespace std;
 using namespace cv;
 // ************ User name Predefine******* //
-#define USERNAME "Hans"
-//#define USERNAME "River"
+//#define USERNAME "Hans"
+#define USERNAME "River"
 // ************ Dataset Predefine *********** //
 //#define Dataset "ADL-Rundle-1"
 //#define Dataset "ADL-Rundle-3"
@@ -118,12 +118,6 @@ int main(){
     
     ReadingExam(DetectionArray,PicArray);
     cout<<"************ End Reading **************\n\n";
-    mypause();		//testing the obtained data
-    //***************************End Reading Data****************************//
-    //CoAppearance_test();mypause();
-    //A_test(5,2);A_test(9,3);A_test(4,4);A_test(3,1);system("pause");
-    //Perm_main(4);system("pause");	Perm_main(5);system("pause");	Perm_main(10);system("pause");
-    //comb_main(5,3);system("pause");
     
     int num_frame=(int)DetectionArray.size();
     int *optimal_hype;
@@ -141,16 +135,14 @@ int main(){
         if (target_num==0) continue;
         max_object=-10000;
         target_link_flag=new bool[target_num];
-        //cout<<"target_num:"<<target_num<<endl;system("pause");
         for (int p = 0; p < target_num; ++p)
         {
             target_link_flag[p]=0;
         }
-        generate_all_possibility(target_num,(int)tracklet_pool.size());
+        generate_all_possibility(target_num,tracklet_num);
         for (int j = 0; j < hyp_all_count; ++j)
         {
             object_current=compute_gain(DetectionArray[i],hyp_all[j]);
-            //cout<<"object_current:"<<object_current;
             if (object_current>max_object)
             {
                 max_object=object_current;
@@ -161,7 +153,6 @@ int main(){
         
         for (int k = 0; k < tracklet_num; ++k)
         {
-            //cout<<"k: "<<k<<" optimal_hype[k]:"<<optimal_hype[k]<<'\n';
             if (optimal_hype[k]!=-1){
                 target_link_flag[optimal_hype[k]]=1;
                 add_P2T(&tracklet_pool[k-difference],&DetectionArray[i][optimal_hype[k]]);
@@ -184,8 +175,7 @@ int main(){
     }
     
     int final_trackletpoolsize=(int) tracklet_pool.size();
-    for (int i=0;i<=final_trackletpoolsize-1;i++){
-        if (final_trackletpoolsize==0) break;
+    for (int i=0;i<final_trackletpoolsize;i++){
         all_tracklet.push_back(tracklet_pool[i]);
     }
     
@@ -215,25 +205,24 @@ int main(){
         }
     }
     // ***Print all tracklet data as frame*** //
-    cout<<"------ Print all tracklet data by frame ------\n\n";
-    for (int i=0;i<=num_frame-1;i++){
-        if (num_frame==0) {cout<<"ERROR in <main>: Total Frame number=0!\n";mypause();break;}
-        int tmp_num=(int) trackletindex[i].size();
-        cout<<"Frame Number: "<<i+1<<"\n";
-        if(tmp_num==0){
-            cout<<"No data\n";
-        }
-        else {
-            for (int j=0;j<=tmp_num-1;j++){
-                cout<<"People ID: "<<trackletindex[i][j]<<" ";
-                all_tracklet[trackletindex[i][j]].storage[pointvarindex[i][j]]->drawprint();
-            }
-        }
-    }
+//    cout<<"------ Print all tracklet data by frame ------\n\n";
+//    for (int i=0;i<=num_frame-1;i++){
+//        int tmp_num=(int) trackletindex[i].size();
+//        cout<<"Frame Number: "<<i+1<<"\n";
+//        if(tmp_num==0){
+//            cout<<"No data\n";
+//        }
+//        else {
+//            for (int j=0;j<=tmp_num-1;j++){
+//                cout<<"People ID: "<<trackletindex[i][j]<<" ";
+//                all_tracklet[trackletindex[i][j]].storage[pointvarindex[i][j]]->drawprint();
+//            }
+//        }
+//    }
     // ***END PRINT*** //
     std::cout<<"----------------------- Begin Draw --------------------------"<<std::endl;
     cout<<"Output direction check: "<<result_img<<endl;
-    mypause();
+//    mypause();
     for (int i = 0; i <PicN ; i++){
         //std::cout << "Image Dir:" << PicArray[i] << std::endl;
         Mat src = imread(PicArray[i]);		//read the i th picture
@@ -247,7 +236,6 @@ int main(){
         //cvPutText(src_new, Frameindex, CvPoint(100, 100), &font, CvScalar(0, 0, 255));	//draw frame number
         int framesize=(int)trackletindex[i].size();
         for (int j=0;j<=framesize-1;j++){
-            if (framesize==0) {cout<<"ERROR in <main>: framesize=0!\n"; break;}
             int x,y,width,height,index;
             width=(int)all_tracklet[trackletindex[i][j]].storage[pointvarindex[i][j]]->width;
             height=(int)all_tracklet[trackletindex[i][j]].storage[pointvarindex[i][j]]->height;
@@ -294,9 +282,9 @@ int main(){
         string out_dir_new, checkdir;
         //cvWaitKey(100);
         out_dir_new=result_img + NumToString2(i+1) + ".jpg";
-        checkdir = NumToString2(i+1) + ".jpg";
-        cout<<checkdir<<"  ";
-        if ((i+1)%7==0) cout<<endl;
+//        checkdir = NumToString2(i+1) + ".jpg";
+//        cout<<checkdir<<"  ";
+//        if ((i+1)%7==0) cout<<endl;
         imwrite(out_dir_new,src);
         cvWaitKey(1);
         writer << src;
