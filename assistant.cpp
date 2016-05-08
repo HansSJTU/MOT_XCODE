@@ -89,14 +89,17 @@ void A_test(int a, int b){
 //**************END Test Functions**************//
 double CoAppearance(tracklet *pre,PointVar *next){
     double totalsum=0;
+    double sum1=0,sum2=0;
     int trackletsize=(int)pre->storage.size();
     double *preap, *nextap;
     preap=pre->storage[trackletsize-1]->apfeature;
     nextap=next->apfeature;
-    for (int i=0 ; i <= 1023 ; i ++){
-        totalsum += (preap[i] - nextap[i]) * (preap[i] - nextap[i]);
+    for (int i=0 ; i < 1024 ; i ++){
+        totalsum += preap[i] * nextap[i];
+        sum1+=preap[i]*preap[i];
+        sum2+=nextap[i]*nextap[i];
     }
-    totalsum = sqrt(totalsum);
+    totalsum /=sqrt(sum1*sum2);
     return totalsum;
 }
 //double CalcNodeAppearance(const Rect *preR,int FrameNum1,const Rect *nextR,int FrameNum2){
@@ -173,7 +176,6 @@ double correlation_motion(tracklet *track,PointVar *candidate){
     PointVar* tmp;
     int scale=0;
     velocity=track->velocity;
-    //cout<<"velocity:"<<velocity;
     scale=(int)track->storage.size();
     tmp=track->storage[scale-1];
     vector1=tmp->position;
@@ -197,17 +199,10 @@ double correlation_node(tracklet *track, PointVar *candidate){
     simi_motion=correlation_motion(track,candidate);
     
     simi_app=CoAppearance(track,candidate);
-    simi_app=1/simi_app;
-    cout<<"Frame1: "<<tmp->frame<<"\t\t"<<"Frame2: "<<candidate->frame<<"\t\t";
-    cout.precision(8);
-    cout<<"simi_motion: "<<simi_motion<<"\t\t";
-    if (simi_motion==0) cout<<"\t\t";
-    cout.precision(8);
-    cout<<"simi_app: "<<simi_app;
     
     result=track->lambda1*simi_motion+track->lambda2*simi_app;
-    //result=simi_app;
-    cout<<"\t\t"<<"simi_all: "<<result<<endl;
+//    result=simi_app;
+//    cout<<"\t\t"<<"simi_all: "<<result<<endl;
     return result;
 }
 void update_relation(std::vector<tracklet> &tracklet_pool){
@@ -489,12 +484,12 @@ void generate_all_possibility(int n,int m){
     int count_tmp=0;
     for (int i=0;i<=hyp_all_count-1;i++){
         for (int j=0;j<=m-1;j++){
-            cout<<hyp_all[i][j]<<" ";
+//            cout<<hyp_all[i][j]<<" ";
         }
         count_tmp++;
-        cout<<"\n";
+//        cout<<"\n";
     }
-    cout<<num_tmp<<" "<<count_tmp<<"\n";
+//    cout<<num_tmp<<" "<<count_tmp<<"\n";
     
     last_numtmp_hyp=num_tmp;
 }
@@ -502,23 +497,21 @@ double compute_gain(std::vector<PointVar> &detection,int *plan){
     double gain=0;
     int size=(int)tracklet_pool.size();
     double lambda;
-    //cout<<plan[0]<<endl;
-    //system("pause");
     //compute the node gain
     for (int i = 0; i < size; ++i)
     {
         if (plan[i]!=-1){
             gain+=correlation_node(&tracklet_pool[i],&detection[plan[i]]);
-            PointVar* target1=tracklet_pool[i].storage.back();
-            PointVar* target2=&detection[plan[i]];
-            for (int j = 0; j < i; ++j)
-            {
-                if (plan[j]!=-1){
-                    PointVar* target3=tracklet_pool[j].storage.back();
-                    PointVar* target4=&detection[plan[j]];
-                    gain-=sigmoid(tracklet_pool[i].relation[j],translation,width)*compute_distance_variation(target1,target2,target3,target4);
-                }
-            }
+//            PointVar* target1=tracklet_pool[i].storage.back();
+//            PointVar* target2=&detection[plan[i]];
+//            for (int j = 0; j < i; ++j)
+//            {
+//                if (plan[j]!=-1){
+//                    PointVar* target3=tracklet_pool[j].storage.back();
+//                    PointVar* target4=&detection[plan[j]];
+//                    gain-=sigmoid(tracklet_pool[i].relation[j],translation,width)*compute_distance_variation(target1,target2,target3,target4);
+//                }
+//            }
         }
     }
     
@@ -526,8 +519,6 @@ double compute_gain(std::vector<PointVar> &detection,int *plan){
 }
 void global_push(tracklet &tmp){
     tracklet_pool.push_back(tmp);
-    //all_tracklet.push_back(tmp);
-    //cout<<"gloabl_push!"<<endl;system("pause");
     for (int i = 0; i < tracklet_pool.size(); ++i)
     {
         //It is reasonable to assume there is no reltion between two targets without evidence
@@ -538,9 +529,6 @@ void global_delete(int k){
     all_tracklet.push_back(tracklet_pool[k]);
     for (int i = 0; i < tracklet_pool.size(); ++i){
         if ((int)tracklet_pool.size()==0) break;
-        //cout<<"k:"<<k<<endl;
-        //cout<<"tracklet_pool.size():"<<tracklet_pool.size()<<endl;
-        //cout<<"tracklet_pool[i].relation.size()"<<tracklet_pool[i].relation.size()<<endl;
         vector<double>:: iterator iter=tracklet_pool[i].relation.begin();
         iter+=k;
         tracklet_pool[i].relation.erase(iter);
