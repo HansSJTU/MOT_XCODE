@@ -185,7 +185,7 @@ double correlation_motion(tracklet *track,PointVar *candidate){
     if (velocity.absolute()==0 || vector2.absolute()==0)
         result=0;
     else
-        result=velocity.dotProduct(velocity,vector2)/(velocity.absolute()*vector2.absolute());
+        result=Vector2<double>::dotProduct(velocity,vector2)/(velocity.absolute()*vector2.absolute());
     return result;
 }
 double correlation_node(tracklet *track, PointVar *candidate){
@@ -196,12 +196,12 @@ double correlation_node(tracklet *track, PointVar *candidate){
     size=(int)track->storage.size();
     tmp=track->storage[size-1];
     
-    simi_motion=correlation_motion(track,candidate);
+//    simi_motion=correlation_motion(track,candidate);
     
     simi_app=CoAppearance(track,candidate);
     
-    result=track->lambda1*simi_motion+track->lambda2*simi_app;
-//    result=simi_app;
+//    result=track->lambda1*simi_motion+track->lambda2*simi_app;
+    result=simi_app;
 //    cout<<"\t\t"<<"simi_all: "<<result<<endl;
 
     result=simi_app;
@@ -249,13 +249,16 @@ void update_relation(std::vector<tracklet> &tracklet_pool){
     return;
 }
 double compute_distance_variation(const PointVar *tracklet1_a,const PointVar *tracklet1_b,const PointVar *tracklet2_a,const PointVar *tracklet2_b){
+    if (tracklet1_a->frame!=tracklet2_a->frame || tracklet1_b->frame!=tracklet2_b->frame) {
+        return 0;
+    }
+    
     double difference;
     double distance1,distance2;
-    Vector2<double> previous=tracklet1_a->position-tracklet1_b->position;
-    Vector2<double> current=tracklet2_a->position-tracklet2_b->position;
-    distance1=previous.absolute();
-    distance2=current.absolute();
-    difference=abs(distance2-distance1)/distance1;
+    Vector2<double> previous=tracklet1_a->position-tracklet2_a->position;
+    Vector2<double> current=tracklet1_b->position-tracklet2_b->position;
+    difference=(previous-current).absolute();
+//    cout<<difference<<endl;
     return difference;
 }
 void update_velocity(tracklet *track){
@@ -417,97 +420,142 @@ void Comb(int step, int n, int m,int* list){
     list[step] = 1, Comb(step + 1, n, m - 1, list);
     list[step] = 0, Comb(step + 1, n, m, list);
 }
-//n is the target number, m is the tracklet number
-void generate_all_possibility(int n,int m){
-    hyp_all_count=0;
-    int num_tmp=0;
-    if (last_numtmp_hyp != -1){
-        for(int j = 0; j < last_numtmp_hyp; j ++)	delete []hyp_all[j];
-        delete []hyp_all;
+
+void generate_all_possibility2(const vector<vector<int> > &candidate,
+                               int pos, vector<int> &plan, vector<int> one_to_one)
+{
+    bool flag=false;
+    if (pos>=candidate.size()) {
+        hyp_all.push_back(plan);
+        return;
     }
-    cout<<"Nodenum:"<<n<<"  trackletnum:"<<m<<"\n";
-    if (n<m) {
-        num_tmp=A(m,n);
-        hyp_all=new int *[num_tmp];
-        for (int i=0;i<=num_tmp-1;i++){
-            hyp_all[i]=new int[m];
-        }
-        for (int i=0;i<=num_tmp-1;i++){
-            for (int j = 0; j <= m - 1; j ++){
-                hyp_all[i][j]=0;
-            }
-        }
-        comb_main(m,n);
-        Perm_main(n);
-        //int t_time=-1;
-        //if (factorial(n)!=0) t_time=A(m,n)/factorial(n)-1;
-        for (int i=0;i<=A(m,n)/factorial(n)-1;i++){
-            for (int j=0;j<=factorial(n)-1;j++){
-                for (int k=0;k<=n-1;k++){
-                    //cout<<comination_all[i][k]-1<<"   "<<permutation_all[j][k]<<"\n";
-                    //system("pause");
-                    hyp_all[hyp_all_count][comination_all[i][k]-1]=permutation_all[j][k];
+    
+
+    if (candidate[pos].size()==0) {
+        plan[pos]=-1;
+        generate_all_possibility2(candidate, pos+1,plan, one_to_one);
+    }
+    else{
+        for (int i=0; i<candidate[pos].size(); i++) {
+            if (one_to_one[candidate[pos][i]]==0) {
+                if (!flag) {
+                    flag=true;
                 }
-                hyp_all_count++;
+                plan[pos]=candidate[pos][i];
+                one_to_one[candidate[pos][i]]=1;
+                generate_all_possibility2(candidate, pos+1, plan, one_to_one);
             }
         }
-        for (int i=0;i<=num_tmp-1;i++){
-            for (int j = 0; j <= m - 1; j ++){
-                hyp_all[i][j]--;
-            }
+        if (!flag) {
+            plan[pos]=-1;
+            generate_all_possibility2(candidate, pos+1,plan, one_to_one);
         }
     }
-    else if (n>=m){
-        num_tmp=A(n,m);
-        hyp_all=new int *[num_tmp];
-        for (int i=0;i<=num_tmp-1;i++){
-            hyp_all[i]=new int[m];
-        }
-        comb_main(n,m);
-        Perm_main(m);
-        int tmp_new;
-        if (factorial(m)==0) tmp_new=0;
-        else tmp_new=A(n,m)/factorial(m);
-        for (int i=0;i<=tmp_new-1;i++){
-            for (int j=0;j<=factorial(m)-1;j++){
-                for (int k=0;k<=m-1;k++){
-                    hyp_all[hyp_all_count][k]=comination_all[i][permutation_all[j][k]-1];
-                }
-                hyp_all_count++;
-            }
-        }
-        for (int i=0;i<=num_tmp-1;i++){
-            for (int j = 0; j <= m - 1; j ++){
-                hyp_all[i][j]--;
-            }
-        }
-    }
-    //print and check
     
-    
-    int count_tmp=0;
-    for (int i=0;i<=hyp_all_count-1;i++){
-        for (int j=0;j<=m-1;j++){
-//            cout<<hyp_all[i][j]<<" ";
-        }
-        count_tmp++;
-//        cout<<"\n";
-    }
-//    cout<<num_tmp<<" "<<count_tmp<<"\n";
-    
-    last_numtmp_hyp=num_tmp;
+    return;
 }
-double compute_gain(std::vector<PointVar> &detection,int *plan){
+
+//n is the target number, m is the tracklet number
+//void generate_all_possibility(int n,int m){
+//    hyp_all_count=0;
+//    int num_tmp=0;
+//    if (last_numtmp_hyp != -1){
+//        for(int j = 0; j < last_numtmp_hyp; j ++)	delete []hyp_all[j];
+//        delete []hyp_all;
+//    }
+//    cout<<"Nodenum:"<<n<<"  trackletnum:"<<m<<"\n";
+//    if (n<m) {
+//        num_tmp=A(m,n);
+//        hyp_all=new int *[num_tmp];
+//        for (int i=0;i<=num_tmp-1;i++){
+//            hyp_all[i]=new int[m];
+//        }
+//        for (int i=0;i<=num_tmp-1;i++){
+//            for (int j = 0; j <= m - 1; j ++){
+//                hyp_all[i][j]=0;
+//            }
+//        }
+//        comb_main(m,n);
+//        Perm_main(n);
+//        //int t_time=-1;
+//        //if (factorial(n)!=0) t_time=A(m,n)/factorial(n)-1;
+//        for (int i=0;i<=A(m,n)/factorial(n)-1;i++){
+//            for (int j=0;j<=factorial(n)-1;j++){
+//                for (int k=0;k<=n-1;k++){
+//                    //cout<<comination_all[i][k]-1<<"   "<<permutation_all[j][k]<<"\n";
+//                    //system("pause");
+//                    hyp_all[hyp_all_count][comination_all[i][k]-1]=permutation_all[j][k];
+//                }
+//                hyp_all_count++;
+//            }
+//        }
+//        for (int i=0;i<=num_tmp-1;i++){
+//            for (int j = 0; j <= m - 1; j ++){
+//                hyp_all[i][j]--;
+//            }
+//        }
+//    }
+//    else if (n>=m){
+//        num_tmp=A(n,m);
+//        hyp_all=new int *[num_tmp];
+//        for (int i=0;i<=num_tmp-1;i++){
+//            hyp_all[i]=new int[m];
+//        }
+//        comb_main(n,m);
+//        Perm_main(m);
+//        int tmp_new;
+//        if (factorial(m)==0) tmp_new=0;
+//        else tmp_new=A(n,m)/factorial(m);
+//        for (int i=0;i<=tmp_new-1;i++){
+//            for (int j=0;j<=factorial(m)-1;j++){
+//                for (int k=0;k<=m-1;k++){
+//                    hyp_all[hyp_all_count][k]=comination_all[i][permutation_all[j][k]-1];
+//                }
+//                hyp_all_count++;
+//            }
+//        }
+//        for (int i=0;i<=num_tmp-1;i++){
+//            for (int j = 0; j <= m - 1; j ++){
+//                hyp_all[i][j]--;
+//            }
+//        }
+//    }
+//    //print and check
+//    
+//    
+//    int count_tmp=0;
+//    for (int i=0;i<=hyp_all_count-1;i++){
+//        for (int j=0;j<=m-1;j++){
+////            cout<<hyp_all[i][j]<<" ";
+//        }
+//        count_tmp++;
+////        cout<<"\n";
+//    }
+////    cout<<num_tmp<<" "<<count_tmp<<"\n";
+//    
+//    last_numtmp_hyp=num_tmp;
+//}
+double compute_gain(std::vector<PointVar> &detection,vector<int> &plan){
     double gain=0;
     int size=(int)tracklet_pool.size();
     double lambda;
+    PointVar* target_tmp,*target_tmp2;
+    PointVar* target1,*target2,*target3,*target4;
+    
     //compute the node gain
     for (int i = 0; i < size; ++i)
     {
         if (plan[i]!=-1){
+            target_tmp=tracklet_pool[i].storage.back();
+            target_tmp2=&detection[plan[i]];
+            double tmp1=target_tmp->position.x;
+            double tmp2=target_tmp2->position.x;
+            if (abs(target_tmp->position.x-target_tmp2->position.x)>100) {
+                return 0;
+            }
             gain+=correlation_node(&tracklet_pool[i],&detection[plan[i]]);
-//            PointVar* target1=tracklet_pool[i].storage.back();
-//            PointVar* target2=&detection[plan[i]];
+//            target1=tracklet_pool[i].storage.back();
+//            target2=&detection[plan[i]];
 //            for (int j = 0; j < i; ++j)
 //            {
 //                if (plan[j]!=-1){
@@ -526,7 +574,7 @@ void global_push(tracklet &tmp){
     for (int i = 0; i < tracklet_pool.size(); ++i)
     {
         //It is reasonable to assume there is no reltion between two targets without evidence
-        tracklet_pool[i].relation.push_back(-100);
+        tracklet_pool[i].relation.push_back(0);
     }
 }
 void global_delete(int k){

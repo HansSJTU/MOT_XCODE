@@ -22,7 +22,7 @@ void global_delete(int k);
 //sigmoid function
 double sigmoid(double a,double b,double c);
 //Compute the cost
-double compute_gain(std::vector<PointVar> &detection,int* plan);
+double compute_gain(std::vector<PointVar> &detection,vector<int> &plan);
 //Get distance
 double GetDistance(Point t1,Point t2);
 //exchange int to string(add 0) (not used)
@@ -61,6 +61,8 @@ void comb_main(int n,int m);//top api
 void Comb(int step, int n, int m,int* list);
 //Generate all A(n,m) possibility
 void generate_all_possibility(int n,int m);
+void generate_all_possibility2(const vector<vector<int> > &candidate,
+                               int pos, vector<int> &plan, vector<int> one_to_one);
 //rectangle color define
 void GetScalar(std::vector<CvScalar> &sVec);
 

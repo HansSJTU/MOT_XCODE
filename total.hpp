@@ -61,7 +61,7 @@ extern int comination_all_count;
 extern int last_numtmp_comination;
 
 //all hyph (dont change)
-extern int** hyp_all;
+extern vector<vector<int> > hyp_all;
 extern int hyp_all_count;
 extern int last_numtmp_hyp;
 
@@ -87,7 +87,7 @@ public:
     bool Use;
     double* apfeature;
     void print(){
-        std::cout<<"Frame:"<<frame<<" ID:"<<id<<" x:"<<position.x<<" y:"<<position.y<<" width:"<<width<<" height:"<<height<<'\n';
+        std::cout<<"Frame:"<<frame<<" ID:"<<id<<" x:"<<position.x<<" y:"<<position.y<<" width:"<<width<<" height:"<<height<<" confidence: "<<trust<<'\n';
     }
     void drawprint(){
         std::cout<<"Frame:"<<frame<<" x:"<<position.x-width/2<<" y:"<<position.y-width/2<<" width:"<<width<<" height:"<<height<<'\n';
@@ -98,7 +98,7 @@ public:
         
         frame=frame1;
         id=ID1;
-        int row = (int)(y1 + width1/2);
+        int row = (int)(y1 + height1/2);
         int col =(int)( x1 + width1/2);
         position.x=col;
         position.y=row;
