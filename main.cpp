@@ -24,11 +24,12 @@ using namespace cv;
 //#define Dataset "ETH-Crossing"
 //#define Dataset "ETH-Jelmoli"
 //#define Dataset "ETH-Linthescher"
-#define Dataset "KITTI-19"
+//#define Dataset "KITTI-19"
 //#define Dataset "Venice-1"
 //#define Dataset "PETS2009"
 //#define Dataset "TUD-Crossing"
 //#define Dataset "Canting5"
+#define Dataset "canteenres"
 // ***************** End **************** //
 
 int main(){
@@ -46,7 +47,7 @@ int main(){
     const std::string out_dir = passp1 + UN + passp5 + DS + passp6;
     const std::string result_img = passp1 + UN + passp5 + DS + "/";
     const std::string feature_dir = passp1 + UN +passp2 +DS + passp4 + passp7;
-    int PicN = 100;
+    int PicN = 1500;
     
     cout<<"Checking <base_dir>   : "<<base_dir<<endl;
     cout<<"Checking <data_dir>   : "<<data_dir<<endl;
@@ -91,6 +92,8 @@ int main(){
     //ReadingExam(DetectionArray,PicArray);
     //mypause();
     ifstream feature(feature_dir);
+    DetectionArray[6][0].print();
+    mypause();
     for (int i=0; i <= DetectionArray.size() - 1 ;i++){
         for (int j = 0; j <= DetectionArray[i].size() - 1; j++){
             if (DetectionArray[i].size() == 0) break;
@@ -120,15 +123,21 @@ int main(){
     cout<<"************ End Reading **************\n\n";
     
     int num_frame=(int)DetectionArray.size();
-    int *optimal_hype;
+    vector<int> optimal_hype;
     double object_current;
     double max_object=0;
     int target_num=0;
     int tracklet_num=0;
     bool *target_link_flag;
     int difference;
+    int bound=20;
+    vector<int> plan;
+    vector<int> one_to_one;
     for (int i = 0; i < num_frame; ++i)
     {
+        if (i%100==0) {
+            cout<<i<<endl;
+        }
         difference=0;
         target_num=(int)DetectionArray[i].size();
         tracklet_num=(int)tracklet_pool.size();
@@ -139,9 +148,29 @@ int main(){
         {
             target_link_flag[p]=0;
         }
-        generate_all_possibility(target_num,tracklet_num);
-        for (int j = 0; j < hyp_all_count; ++j)
+        vector<vector<int> > candidate;
+        candidate.assign(tracklet_num,vector<int>(0,0));
+        for (int m=0; m<tracklet_num; m++) {
+            PointVar *tmp=tracklet_pool[m].storage.back();
+            for (int n=0; n<target_num; n++) {
+                if ((abs(DetectionArray[i][n].position.x-tmp->position.x)<bound) &&
+                        (abs(DetectionArray[i][n].position.y-tmp->position.y)<bound)) {
+                    candidate[m].push_back(n);
+                }
+            }
+        }
+//        int tmp=candidate.size();
+        plan.assign(tracklet_num,-1);
+        one_to_one.assign(target_num,0);
+        hyp_all.assign(0,vector<int>(tracklet_num,-1));
+        generate_all_possibility2(candidate, 0, plan, one_to_one);
+        
+//        generate_all_possibility(target_num,tracklet_num);
+        vector<int> plan(tracklet_num,-1);
+        for (int j = 0; j < hyp_all.size(); ++j)
         {
+//            if (i==72)
+//                cout<<1<<endl;
             object_current=compute_gain(DetectionArray[i],hyp_all[j]);
             if (object_current>max_object)
             {
@@ -150,7 +179,7 @@ int main(){
                 optimal_hype=hyp_all[j];
             }
         }
-        
+
         for (int k = 0; k < tracklet_num; ++k)
         {
             if (optimal_hype[k]!=-1){
@@ -162,6 +191,8 @@ int main(){
                 difference++;
             }
         }
+        
+        update_relation(tracklet_pool);
         
         for (int q = 0; q < target_num; ++q)
         {
@@ -205,20 +236,20 @@ int main(){
         }
     }
     // ***Print all tracklet data as frame*** //
-//    cout<<"------ Print all tracklet data by frame ------\n\n";
-//    for (int i=0;i<=num_frame-1;i++){
-//        int tmp_num=(int) trackletindex[i].size();
-//        cout<<"Frame Number: "<<i+1<<"\n";
-//        if(tmp_num==0){
-//            cout<<"No data\n";
-//        }
-//        else {
-//            for (int j=0;j<=tmp_num-1;j++){
-//                cout<<"People ID: "<<trackletindex[i][j]<<" ";
-//                all_tracklet[trackletindex[i][j]].storage[pointvarindex[i][j]]->drawprint();
-//            }
-//        }
-//    }
+    cout<<"------ Print all tracklet data by frame ------\n\n";
+    for (int i=0;i<=num_frame-1;i++){
+        int tmp_num=(int) trackletindex[i].size();
+        cout<<"Frame Number: "<<i+1<<"\n";
+        if(tmp_num==0){
+            cout<<"No data\n";
+        }
+        else {
+            for (int j=0;j<=tmp_num-1;j++){
+                cout<<"People ID: "<<trackletindex[i][j]<<" ";
+                all_tracklet[trackletindex[i][j]].storage[pointvarindex[i][j]]->drawprint();
+            }
+        }
+    }
     // ***END PRINT*** //
     std::cout<<"----------------------- Begin Draw --------------------------"<<std::endl;
     cout<<"Output direction check: "<<result_img<<endl;
@@ -240,7 +271,7 @@ int main(){
             width=(int)all_tracklet[trackletindex[i][j]].storage[pointvarindex[i][j]]->width;
             height=(int)all_tracklet[trackletindex[i][j]].storage[pointvarindex[i][j]]->height;
             x=(int)(all_tracklet[trackletindex[i][j]].storage[pointvarindex[i][j]]->position.x-width/2);
-            y=(int)(all_tracklet[trackletindex[i][j]].storage[pointvarindex[i][j]]->position.y-width/2);
+            y=(int)(all_tracklet[trackletindex[i][j]].storage[pointvarindex[i][j]]->position.y-height/2);
             index=trackletindex[i][j];
             // x = (int)((double)x*1.875);
             // y = (int)((double)y*1.875);
@@ -287,7 +318,7 @@ int main(){
 //        if ((i+1)%7==0) cout<<endl;
         imwrite(out_dir_new,src);
         cvWaitKey(1);
-        writer << src;
+      //  writer << src;
     }
     writer.release();
     std::cout<<"\n------------------------- END -------------------------------"<<std::endl;
