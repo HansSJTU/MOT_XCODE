@@ -203,6 +203,10 @@ double correlation_node(tracklet *track, PointVar *candidate){
     result=track->lambda1*simi_motion+track->lambda2*simi_app;
 //    result=simi_app;
 //    cout<<"\t\t"<<"simi_all: "<<result<<endl;
+
+    result=simi_app;
+//    cout<<"\t\t"<<"simi_all: "<<result<<endl;
+
     return result;
 }
 void update_relation(std::vector<tracklet> &tracklet_pool){
@@ -526,16 +530,18 @@ void global_push(tracklet &tmp){
     }
 }
 void global_delete(int k){
-    all_tracklet.push_back(tracklet_pool[k]);
-    for (int i = 0; i < tracklet_pool.size(); ++i){
-        if ((int)tracklet_pool.size()==0) break;
-        vector<double>:: iterator iter=tracklet_pool[i].relation.begin();
-        iter+=k;
-        tracklet_pool[i].relation.erase(iter);
+    if (++tracklet_pool[k].delete_counting>5){
+        all_tracklet.push_back(tracklet_pool[k]);
+        for (int i = 0; i < tracklet_pool.size(); ++i){
+            if ((int)tracklet_pool.size()==0) break;
+            vector<double>:: iterator iter=tracklet_pool[i].relation.begin();
+            iter+=k;
+            tracklet_pool[i].relation.erase(iter);
+        }
+        vector<tracklet>::iterator iter1=tracklet_pool.begin();
+        iter1+=k;
+        tracklet_pool.erase(iter1);
     }
-    vector<tracklet>::iterator iter1=tracklet_pool.begin();
-    iter1+=k;
-    tracklet_pool.erase(iter1);
 }
 double sigmoid(double x,double a,double b){
     double denominator;
@@ -552,10 +558,10 @@ void GetScalar(std::vector<CvScalar> &sVec){
     sVec.push_back(CvScalar(128,0,255));
     sVec.push_back(CvScalar(0,128,255));
     sVec.push_back(CvScalar(128,255,0));
+    sVec.push_back(CvScalar(0,255,128));
+    sVec.push_back(CvScalar(255,128,0));
+    sVec.push_back(CvScalar(255,0,128));
     sVec.push_back(CvScalar(128,128,255));
-    sVec.push_back(CvScalar(255,128,255));
-    sVec.push_back(CvScalar(255,255,0));
-    sVec.push_back(CvScalar(128,0,255));
-    sVec.push_back(CvScalar(0,255,255));
-    sVec.push_back(CvScalar(255,255,0));
+    sVec.push_back(CvScalar(128,255,128));
+    sVec.push_back(CvScalar(255,128,128));
 }

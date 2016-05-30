@@ -16,11 +16,13 @@
 /********************************/
 
 /********KITTI16/KITTI19*************/
-const CvPoint ROI_LeftTop(75,70);
-const CvPoint ROI_RightDown(1190,330);
-
+const CvPoint ROI_LeftTop(0,0);
+const CvPoint ROI_RightDown(640,480);
+//
+//const CvPoint Border_LeftTop(0,0);
+//const CvPoint Border_RightDown(1238,374);
 const CvPoint Border_LeftTop(0,0);
-const CvPoint Border_RightDown(1238,374);
+const CvPoint Border_RightDown(640,480);
 /********************************/
 
 /********Venice1*************/
@@ -29,6 +31,8 @@ const CvPoint Border_RightDown(1238,374);
 //
 //const cv::Point Border_LeftTop(50,90);
 //const cv::Point Border_RightDown(980,550);
+
+
 /********************************/
 
 /********Crossing/Linthescher/Jemoli/TUD-Crossing*************/
@@ -51,9 +55,8 @@ const CvPoint Border_RightDown(1238,374);
 /********Canting5*************/
 //const cv::Point ROI_LeftTop(30,320);
 //const cv::Point ROI_RightDown(1200,680);
-//
-//const cv::Point Border_LeftTop(20,300);
-//const cv::Point Border_RightDown(1200,710);
+//const CvPoint Border_LeftTop(0,0);
+//const CvPoint Border_RightDown(640,480);
 /********************************/
 
 std::vector<std::vector<PointVar>> DetectionArray;
@@ -63,17 +66,18 @@ std::vector<tracklet> tracklet_pool;
 std::vector<tracklet> all_tracklet;
 
 tracklet::tracklet(){
-    velocity=0;lambda1=0.5;lambda2=0.5;
+    velocity=0;lambda1=0.5;lambda2=0.5;delete_counting=0;
     relation.resize(tracklet_pool.size()+1,0);
 }
 
 tracklet::tracklet(PointVar *target):velocity(0),lambda1(0.5),lambda2(0.5)
 {
     storage.push_back(target);
+    delete_counting=0;
     relation.resize(tracklet_pool.size()+1,0);
 }
 
-const char path[] = "C:\\Users\\Hans\\Desktop\\MCMC_v4\\data\\KITTI-19\\img1\\";
+//const char path[] = "C:\\Users\\Hans\\Desktop\\MCMC_v4\\data\\KITTI-19\\img1\\";
 
 const double edge_threshold=1;
 const double width=1;

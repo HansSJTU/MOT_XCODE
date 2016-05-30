@@ -10,12 +10,15 @@
 #include <fstream>
 #include <string>
 #include <cv.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include "assistant.hpp"
+#include <stdlib.h>
 using namespace std;
 using namespace cv;
 // ************ User name Predefine******* //
-//#define USERNAME "Hans"
-#define USERNAME "River"
+#define USERNAME "Hans"
+//#define USERNAME "River"
 // ************ Dataset Predefine *********** //
 //#define Dataset "ADL-Rundle-1"
 //#define Dataset "ADL-Rundle-3"
@@ -24,11 +27,11 @@ using namespace cv;
 //#define Dataset "ETH-Crossing"
 //#define Dataset "ETH-Jelmoli"
 //#define Dataset "ETH-Linthescher"
-#define Dataset "KITTI-19"
+//#define Dataset "KITTI-19"
 //#define Dataset "Venice-1"
 //#define Dataset "PETS2009"
 //#define Dataset "TUD-Crossing"
-//#define Dataset "Canting5"
+#define Dataset "canteenres"
 // ***************** End **************** //
 
 int main(){
@@ -46,8 +49,9 @@ int main(){
     const std::string out_dir = passp1 + UN + passp5 + DS + passp6;
     const std::string result_img = passp1 + UN + passp5 + DS + "/";
     const std::string feature_dir = passp1 + UN +passp2 +DS + passp4 + passp7;
-    int PicN = 100;
-    
+    int start = 20;
+    int totalFrame = 20;
+    int PicN = start + totalFrame - 1;
     cout<<"Checking <base_dir>   : "<<base_dir<<endl;
     cout<<"Checking <data_dir>   : "<<data_dir<<endl;
     cout<<"Checking <feature_dir>: "<<feature_dir<<endl;
@@ -91,7 +95,7 @@ int main(){
     //ReadingExam(DetectionArray,PicArray);
     //mypause();
     ifstream feature(feature_dir);
-    for (int i=0; i <= DetectionArray.size() - 1 ;i++){
+    for (int i = 0; i <= DetectionArray.size() - 1 ;i++){
         for (int j = 0; j <= DetectionArray[i].size() - 1; j++){
             if (DetectionArray[i].size() == 0) break;
             double* feature_tmp;
@@ -127,7 +131,7 @@ int main(){
     int tracklet_num=0;
     bool *target_link_flag;
     int difference;
-    for (int i = 0; i < num_frame; ++i)
+    for (int i = start - 1; i < num_frame; ++i)
     {
         difference=0;
         target_num=(int)DetectionArray[i].size();
@@ -139,6 +143,7 @@ int main(){
         {
             target_link_flag[p]=0;
         }
+        cout<<i+1<<'\t';
         generate_all_possibility(target_num,tracklet_num);
         for (int j = 0; j < hyp_all_count; ++j)
         {
@@ -222,8 +227,12 @@ int main(){
     // ***END PRINT*** //
     std::cout<<"----------------------- Begin Draw --------------------------"<<std::endl;
     cout<<"Output direction check: "<<result_img<<endl;
-//    mypause();
-    for (int i = 0; i <PicN ; i++){
+    string rm_ins = "rm -r ";
+    rm_ins = rm_ins + result_img;
+    system(rm_ins.c_str());
+    mkdir(result_img.c_str(),00777);
+    mypause();
+    for (int i = start-1; i <PicN ; i++){
         //std::cout << "Image Dir:" << PicArray[i] << std::endl;
         Mat src = imread(PicArray[i]);		//read the i th picture
         
@@ -258,14 +267,14 @@ int main(){
             t2.y = y;
             
             CvScalar s = sVec[index % sVec.size()];
-            rectangle(src, r, s,3);
+            rectangle(src, r, s,1);
             
             std::stringstream ss;
             ss << index;
             std::string strIndex;
             ss >> strIndex;
             
-            putText(src, strIndex, t2, CV_FONT_HERSHEY_COMPLEX, 1, s);		//draw index
+            putText(src, strIndex, t2, CV_FONT_HERSHEY_COMPLEX, 0.5, s);		//draw index
         }
         //DrawDetectionDots(src, DetectionArray[i],4,Scalar(0,0,255),false);	//true代表是1080分辨率的
         
@@ -287,7 +296,7 @@ int main(){
 //        if ((i+1)%7==0) cout<<endl;
         imwrite(out_dir_new,src);
         cvWaitKey(1);
-        writer << src;
+ //       writer << src;
     }
     writer.release();
     std::cout<<"\n------------------------- END -------------------------------"<<std::endl;

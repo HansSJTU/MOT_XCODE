@@ -121,6 +121,7 @@ public:
 //Tracklet Structure
 class tracklet{
 public:
+    int delete_counting;
     Vector2<double> velocity;
     std::vector <PointVar*> storage;
     std::vector<double> relation;
