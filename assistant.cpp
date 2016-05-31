@@ -99,7 +99,7 @@ double CoAppearance(tracklet *pre,PointVar *next){
         sum1+=preap[i]*preap[i];
         sum2+=nextap[i]*nextap[i];
     }
-    totalsum /=sqrt(sum1*sum2);
+    totalsum /= sqrt(sum1*sum2);
     return totalsum;
 }
 //double CalcNodeAppearance(const Rect *preR,int FrameNum1,const Rect *nextR,int FrameNum2){
@@ -201,9 +201,6 @@ double correlation_node(tracklet *track, PointVar *candidate){
     simi_app=CoAppearance(track,candidate);
     
 //    result=track->lambda1*simi_motion+track->lambda2*simi_app;
-    result=simi_app;
-//    cout<<"\t\t"<<"simi_all: "<<result<<endl;
-
     result=simi_app;
 //    cout<<"\t\t"<<"simi_all: "<<result<<endl;
 
@@ -577,8 +574,8 @@ void global_push(tracklet &tmp){
         tracklet_pool[i].relation.push_back(0);
     }
 }
-void global_delete(int k){
-    if (++tracklet_pool[k].delete_counting>5){
+void global_delete(int k){ 
+    if (++tracklet_pool[k].delete_counting > 2 ){
         all_tracklet.push_back(tracklet_pool[k]);
         for (int i = 0; i < tracklet_pool.size(); ++i){
             if ((int)tracklet_pool.size()==0) break;

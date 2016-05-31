@@ -160,18 +160,15 @@ int main(){
                 }
             }
         }
-//        int tmp=candidate.size();
         plan.assign(tracklet_num,-1);
         one_to_one.assign(target_num,0);
         hyp_all.assign(0,vector<int>(tracklet_num,-1));
         generate_all_possibility2(candidate, 0, plan, one_to_one);
         
-//        generate_all_possibility(target_num,tracklet_num);
+//      generate_all_possibility(target_num,tracklet_num);
         vector<int> plan(tracklet_num,-1);
         for (int j = 0; j < hyp_all.size(); ++j)
         {
-//            if (i==72)
-//                cout<<1<<endl;
             object_current=compute_gain(DetectionArray[i],hyp_all[j]);
             if (object_current>max_object)
             {
@@ -237,20 +234,20 @@ int main(){
         }
     }
     // ***Print all tracklet data as frame*** //
-    cout<<"------ Print all tracklet data by frame ------\n\n";
-    for (int i=0;i<=num_frame-1;i++){
-        int tmp_num=(int) trackletindex[i].size();
-        cout<<"Frame Number: "<<i+1<<"\n";
-        if(tmp_num==0){
-            cout<<"No data\n";
-        }
-        else {
-            for (int j=0;j<=tmp_num-1;j++){
-                cout<<"People ID: "<<trackletindex[i][j]<<" ";
-                all_tracklet[trackletindex[i][j]].storage[pointvarindex[i][j]]->drawprint();
-            }
-        }
-    }
+//    cout<<"------ Print all tracklet data by frame ------\n\n";
+//    for (int i=0;i<=num_frame-1;i++){
+//        int tmp_num=(int) trackletindex[i].size();
+//        cout<<"Frame Number: "<<i+1<<"\n";
+//        if(tmp_num==0){
+//            cout<<"No data\n";
+//        }
+//        else {
+//            for (int j=0;j<=tmp_num-1;j++){
+//                cout<<"People ID: "<<trackletindex[i][j]<<" ";
+//                all_tracklet[trackletindex[i][j]].storage[pointvarindex[i][j]]->drawprint();
+//            }
+//        }
+//    }
     // ***END PRINT*** //
     std::cout<<"----------------------- Begin Draw --------------------------"<<std::endl;
     cout<<"Output direction check: "<<result_img<<endl;
@@ -301,7 +298,7 @@ int main(){
             std::string strIndex;
             ss >> strIndex;
             
-            putText(src, strIndex, t2, CV_FONT_HERSHEY_COMPLEX, 0.5, s);		//draw index
+            putText(src, strIndex, t2, CV_FONT_HERSHEY_SIMPLEX, 1, s);		//draw index
         }
         //DrawDetectionDots(src, DetectionArray[i],4,Scalar(0,0,255),false);	//true代表是1080分辨率的
         
