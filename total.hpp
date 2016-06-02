@@ -65,8 +65,8 @@ extern vector<vector<int> > hyp_all;
 extern int hyp_all_count;
 extern int last_numtmp_hyp;
 
-//read and draw exchange flag
-extern int calc_flag;
+//Variable used in print results, if detections in a tracklet is less than it, not print
+extern int Delete_Less_Than;
 /**********************************End Variable************************************/
 /**********************************************************************************/
 /*****************************Sturcture Declaration********************************/
@@ -121,7 +121,8 @@ public:
 //Tracklet Structure
 class tracklet{
 public:
-    int delete_counting;
+    int delete_counting; //buffer detection frames
+    int printbool;  // indicates whether to print in final results or not
     Vector2<double> velocity;
     std::vector <PointVar*> storage;
     std::vector<double> relation;

@@ -27,11 +27,11 @@ using namespace cv;
 //#define Dataset "ETH-Crossing"
 //#define Dataset "ETH-Jelmoli"
 //#define Dataset "ETH-Linthescher"
-//#define Dataset "KITTI-19"
+#define Dataset "KITTI-19"
 //#define Dataset "Venice-1"
 //#define Dataset "PETS2009"
 //#define Dataset "TUD-Crossing"
-#define Dataset "canteenres"
+//#define Dataset "canteenres"
 // ***************** End **************** //
 
 int main(){
@@ -50,7 +50,7 @@ int main(){
     const std::string result_img = passp1 + UN + passp5 + DS + "/";
     const std::string feature_dir = passp1 + UN +passp2 +DS + passp4 + passp7;
     int start = 1;
-    int totalFrame = 300;
+    int totalFrame = 1000;
     int PicN = start + totalFrame - 1;
     cout<<"Checking <base_dir>   : "<<base_dir<<endl;
     cout<<"Checking <data_dir>   : "<<data_dir<<endl;
@@ -228,11 +228,41 @@ int main(){
     for (int i = 0;i <= num_tracklet-1;i++){
         if (num_tracklet==0) {cout<<"ERROR in <main>: Tracklet number=0!\n"; mypause(); break;}
         int tmp_num=(int)all_tracklet[i].storage.size();
+        if (all_tracklet[i].storage.size() <= Delete_Less_Than) {
+            all_tracklet[i].printbool=0;
+        }
+        else {
+            for (int j=0;j<=tmp_num-2;j++){
+                if (tmp_num==0) {cout<<"Warning in <main>: Tracklet "<<j<<" has no pointvar in it!\n"; mypause();break;}
+                int frame1 = all_tracklet[i].storage[j]->frame;
+                int frame2 = all_tracklet[i].storage[j+1]->frame;
+                double width1 = all_tracklet[i].storage[j]->width;
+                double height1 = all_tracklet[i].storage[j]->height;
+                double x1 = all_tracklet[i].storage[j]->position.x - width1/2;
+                double y1 = all_tracklet[i].storage[j]->position.y - height1/2;
+                double width2 = all_tracklet[i].storage[j+1]->width;
+                double height2 = all_tracklet[i].storage[j+1]->height;
+                double x2 = all_tracklet[i].storage[j+1]->position.x - width2/2;
+                double y2 = all_tracklet[i].storage[j+1]->position.y - height2/2;
+                for (int q = 0; q < frame2-frame1-1; q++) {
+                    PointVar* tmp1 = new PointVar(frame1+q+1,(x2-x1)/(frame2-frame1)*(q+1)+x1,(y2-y1)/(frame2-frame1)*(q+1)+y1,(width2-width1)/(frame2-frame1)*(q+1)+width1,(height2-height1)/(frame2-frame1)*(q+1)+height1,-1,-1);
+                    all_tracklet[i].storage.insert(all_tracklet[i].storage.begin()+j+q,tmp1);
+                }
+                j = j + frame2 - frame1 - 1;
+                tmp_num += frame2 - frame1 - 1;
+            }
+        }
+    }
+    for (int i = 0;i <= num_tracklet-1;i++){
+        if (num_tracklet==0) {cout<<"ERROR in <main>: Tracklet number=0!\n"; mypause(); break;}
+        int tmp_num=(int)all_tracklet[i].storage.size();
         for (int j=0;j<=tmp_num-1;j++){
             if (tmp_num==0) {cout<<"Warning in <main>: Tracklet "<<j<<" has no pointvar in it!\n"; mypause();break;}
             //cout<<"tracklet_pool[i].storage[j]->frame: "<<tracklet_pool[i].storage[j]->frame<<'\n';
-            trackletindex[all_tracklet[i].storage[j]->frame-1].push_back(i);
-            pointvarindex[all_tracklet[i].storage[j]->frame-1].push_back(j);
+            if (all_tracklet[i].printbool==1){
+                trackletindex[all_tracklet[i].storage[j]->frame-1].push_back(i);
+                pointvarindex[all_tracklet[i].storage[j]->frame-1].push_back(j);
+            }
         }
     }
     // ***Print all tracklet data as frame*** //
@@ -299,8 +329,11 @@ int main(){
             ss << index;
             std::string strIndex;
             ss >> strIndex;
+            if (all_tracklet[trackletindex[i][j]].storage[pointvarindex[i][j]]->id==-1) {
+                strIndex += '*';
+            }
             
-            putText(src, strIndex, t2, CV_FONT_HERSHEY_SIMPLEX, 1, s);		//draw index
+            putText(src, strIndex, t2, CV_FONT_HERSHEY_SIMPLEX, 0.8, s);		//draw index
         }
         //DrawDetectionDots(src, DetectionArray[i],4,Scalar(0,0,255),false);	//true代表是1080分辨率的
         
