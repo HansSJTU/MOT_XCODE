@@ -547,7 +547,9 @@ double compute_gain(std::vector<PointVar> &detection,vector<int> &plan){
             target_tmp2=&detection[plan[i]];
             double tmp1=target_tmp->position.x;
             double tmp2=target_tmp2->position.x;
-            if (abs(target_tmp->position.x-target_tmp2->position.x)>100) {
+            if (abs(target_tmp->position.x-target_tmp2->position.x)>20) {
+                cout<<"Wrong in compute_gain!"<<endl;
+                mypause();
                 return 0;
             }
             gain+=correlation_node(&tracklet_pool[i],&detection[plan[i]]);
@@ -574,8 +576,8 @@ void global_push(tracklet &tmp){
         tracklet_pool[i].relation.push_back(0);
     }
 }
-void global_delete(int k){ 
-    if (++tracklet_pool[k].delete_counting > 2 ){
+int global_delete(int k){
+    if (++tracklet_pool[k].delete_counting > 10 ){
         all_tracklet.push_back(tracklet_pool[k]);
         for (int i = 0; i < tracklet_pool.size(); ++i){
             if ((int)tracklet_pool.size()==0) break;
@@ -586,7 +588,9 @@ void global_delete(int k){
         vector<tracklet>::iterator iter1=tracklet_pool.begin();
         iter1+=k;
         tracklet_pool.erase(iter1);
+        return 1;
     }
+    else return 0;
 }
 double sigmoid(double x,double a,double b){
     double denominator;

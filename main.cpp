@@ -183,10 +183,12 @@ int main(){
             if (optimal_hype[k]!=-1){
                 target_link_flag[optimal_hype[k]]=1;
                 add_P2T(&tracklet_pool[k-difference],&DetectionArray[i][optimal_hype[k]]);
+                tracklet_pool[k-difference].delete_counting=0;
             }
             else{
-                global_delete(k-difference);
-                difference++;
+                int tmp=global_delete(k-difference);
+                if (tmp==1)
+                    difference++;
             }
         }
         

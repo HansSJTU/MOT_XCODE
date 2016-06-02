@@ -18,7 +18,7 @@ extern std::vector<tracklet> tracklet_pool;
 //push back a tracklet globally(including tracklet pool,all_tracklet and the relation vector in each tracklet)
 void global_push(tracklet &tmp);
 //delete a tracklet near globally(not including the all_tracklet)
-void global_delete(int k);
+int global_delete(int k);
 //sigmoid function
 double sigmoid(double a,double b,double c);
 //Compute the cost
