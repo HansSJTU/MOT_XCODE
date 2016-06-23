@@ -17,8 +17,8 @@
 using namespace std;
 using namespace cv;
 // ************ User name Predefine******* //
-#define USERNAME "Hans"
-//#define USERNAME "River"
+//#define USERNAME "Hans"
+#define USERNAME "River"
 // ************ Dataset Predefine *********** //
 //#define Dataset "ADL-Rundle-1"
 //#define Dataset "ADL-Rundle-3"
