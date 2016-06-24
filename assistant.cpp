@@ -554,17 +554,17 @@ double compute_gain(std::vector<PointVar> &detection,vector<int> &plan){
 //                mypause();
 //                return 0;
 //        }
-            gain+=correlation_node(&tracklet_pool[i],&detection[plan[i]]);
-            target1=tracklet_pool[i].storage.back();
-            target2=&detection[plan[i]];
-            for (int j = 0; j < i; ++j)
-            {
-                if (plan[j]!=-1){
-                    PointVar* target3=tracklet_pool[j].storage.back();
-                    PointVar* target4=&detection[plan[j]];
-                    gain-=sigmoid(tracklet_pool[i].relation[j],translation,width)*compute_distance_variation(target1,target2,target3,target4);
-                }
-            }
+//            gain+=correlation_node(&tracklet_pool[i],&detection[plan[i]]);
+//            target1=tracklet_pool[i].storage.back();
+//            target2=&detection[plan[i]];
+//            for (int j = 0; j < i; ++j)
+//            {
+//                if (plan[j]!=-1){
+//                    PointVar* target3=tracklet_pool[j].storage.back();
+//                    PointVar* target4=&detection[plan[j]];
+//                    gain-=sigmoid(tracklet_pool[i].relation[j],translation,width)*compute_distance_variation(target1,target2,target3,target4);
+//                }
+//            }
         }
     }
     
