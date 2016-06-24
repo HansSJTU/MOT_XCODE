@@ -16,7 +16,7 @@
 #include <stdlib.h>
 using namespace std;
 using namespace cv;
-// ************ User name Predefine******* //
+// ************ User name Predefine ******* //
 #define USERNAME "Hans"
 //#define USERNAME "River"
 // ************ Dataset Predefine *********** //
@@ -27,11 +27,11 @@ using namespace cv;
 //#define Dataset "ETH-Crossing"
 //#define Dataset "ETH-Jelmoli"
 //#define Dataset "ETH-Linthescher"
-#define Dataset "KITTI-19"
+//#define Dataset "KITTI-19"
 //#define Dataset "Venice-1"
 //#define Dataset "PETS2009"
 //#define Dataset "TUD-Crossing"
-//#define Dataset "canteenres"
+#define Dataset "canteenres"
 // ***************** End **************** //
 
 int main(){
@@ -57,6 +57,7 @@ int main(){
     cout<<"Checking <feature_dir>: "<<feature_dir<<endl;
     //***************** Reading data into memory********************//
     cout<<"\n***************** Reading Data *****************\n\n";
+    cout<<"\n*************************  Reading det\n";
     std::vector<string> PicArray;
     std::string Txtname, Listname,Imglist;
     Txtname = data_dir+"data.txt";
@@ -71,7 +72,12 @@ int main(){
         cout<<"Warning in <main:PicN>: Exceeding Frame!\n";mypause();
         PicN = totalframe;
     }
+    int star_count = 0; //to count print "*"
     for(int i = 0; i < PicN; i++){
+        for (int star_count_tmp=0 ; star_count_tmp <(int) ((i+1)/double(PicN)*100/4-star_count) ;star_count_tmp++){
+            cout<<"*";
+        }
+        star_count=(int) (i+1)/double(PicN)*100/4;
         int detection_num, nonsense;
         fin_list>>nonsense>>detection_num;
         string tmpstring;
@@ -90,12 +96,19 @@ int main(){
         }
         DetectionArray.push_back(OneDetection);
     }
+    cout<<"  Finished";
     fin_data.close();
     fin_list.close();
     //ReadingExam(DetectionArray,PicArray);
     //mypause();
+    cout<<"\n*************************  Reading features\n";
+    star_count = 0;
     ifstream feature(feature_dir);
     for (int i=0; i <= DetectionArray.size() - 1 ;i++){
+        for (int star_count_tmp=0 ; star_count_tmp <(int) ((i+1)/double(DetectionArray.size())*100/4-star_count) ;star_count_tmp++){
+            cout<<"*";
+        }
+        star_count=(int) (i+1)/double(DetectionArray.size())*100/4;
         for (int j = 0; j <= DetectionArray[i].size() - 1; j++){
             if (DetectionArray[i].size() == 0) break;
             double* feature_tmp;
@@ -120,8 +133,9 @@ int main(){
         }
     }
     
-    ReadingExam(DetectionArray,PicArray);
-    cout<<"************ End Reading **************\n\n";
+    //ReadingExam(DetectionArray,PicArray);
+    cout<<"  Finished";
+    cout<<"\n************ End Reading **************\n\n";
     
     int num_frame=(int)DetectionArray.size();
     vector<int> optimal_hype;
@@ -153,9 +167,10 @@ int main(){
         candidate.assign(tracklet_num,vector<int>(0,0));
         for (int m=0; m<tracklet_num; m++) {
             PointVar *tmp=tracklet_pool[m].storage.back();
+            int dele_count = tracklet_pool[m].delete_counting;
             for (int n=0; n<target_num; n++) {
-                if ((abs(DetectionArray[i][n].position.x-tmp->position.x)<bound) &&
-                        (abs(DetectionArray[i][n].position.y-tmp->position.y)<bound)) {
+                if ((abs(DetectionArray[i][n].position.x-tmp->position.x)<bound+5*dele_count) &&
+                        (abs(DetectionArray[i][n].position.y-tmp->position.y)<bound+5*dele_count)) {
                     candidate[m].push_back(n);
                 }
             }
@@ -283,12 +298,18 @@ int main(){
     // ***END PRINT*** //
     std::cout<<"----------------------- Begin Draw --------------------------"<<std::endl;
     cout<<"Output direction check: "<<result_img<<endl;
+    mypause();
+    cout<<"\n*************************  Output img\n";
     string rm_ins = "rm -r ";
     rm_ins = rm_ins + result_img;
     system(rm_ins.c_str());
     mkdir(result_img.c_str(),00777);
-    mypause();
+    star_count=0;
     for (int i = start-1; i <PicN ; i++){
+        for (int star_count_tmp=0 ; star_count_tmp <(int) ((i+1)/double(PicN)*100/4-star_count) ;star_count_tmp++){
+            cout<<"*";
+        }
+        star_count=(int) (i+1)/double(PicN)*100/4;
         //std::cout << "Image Dir:" << PicArray[i] << std::endl;
         Mat src = imread(PicArray[i]);		//read the i th picture
         

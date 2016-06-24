@@ -67,6 +67,9 @@ extern int last_numtmp_hyp;
 
 //Variable used in print results, if detections in a tracklet is less than it, not print
 extern int Delete_Less_Than;
+
+//buffer of lost in frames
+extern int GLOBAL_DELETE_BUFFER;
 /**********************************End Variable************************************/
 /**********************************************************************************/
 /*****************************Sturcture Declaration********************************/

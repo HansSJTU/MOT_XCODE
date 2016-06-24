@@ -17,19 +17,19 @@
 
 /********KITTI16/KITTI19*************/
 
-const CvPoint ROI_LeftTop(0,0);
-const CvPoint ROI_RightDown(1238,374);
-
-const CvPoint Border_LeftTop(0,0);
-const CvPoint Border_RightDown(1238,374);
+//const CvPoint ROI_LeftTop(0,0);
+//const CvPoint ROI_RightDown(1238,374);
+//
+//const CvPoint Border_LeftTop(0,0);
+//const CvPoint Border_RightDown(1238,374);
 /********************************/
 
 /********canteenres*************/
-//const CvPoint ROI_LeftTop(0,0);
-//const CvPoint ROI_RightDown(640,480);
-//
-//const CvPoint Border_LeftTop(0,0);
-//const CvPoint Border_RightDown(640,480);
+const CvPoint ROI_LeftTop(0,0);
+const CvPoint ROI_RightDown(640,480);
+
+const CvPoint Border_LeftTop(0,0);
+const CvPoint Border_RightDown(640,480);
 /********************************/
 
 /********Venice1*************/
@@ -104,5 +104,6 @@ vector<vector<int> > hyp_all;
 int hyp_all_count=0;
 int last_numtmp_hyp=-1;
 
-int Delete_Less_Than=2;
+int Delete_Less_Than=8;
+int GLOBAL_DELETE_BUFFER=10;
 
