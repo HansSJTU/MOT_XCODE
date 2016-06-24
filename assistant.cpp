@@ -441,6 +441,8 @@ void generate_all_possibility2(const vector<vector<int> > &candidate,
                 plan[pos]=candidate[pos][i];
                 one_to_one[candidate[pos][i]]=1;
                 generate_all_possibility2(candidate, pos+1, plan, one_to_one);
+                one_to_one[candidate[pos][i]]=0;
+                flag=false;
             }
         }
         if (!flag) {
@@ -547,11 +549,11 @@ double compute_gain(std::vector<PointVar> &detection,vector<int> &plan){
             target_tmp2=&detection[plan[i]];
             double tmp1=target_tmp->position.x;
             double tmp2=target_tmp2->position.x;
-            if (abs(target_tmp->position.x-target_tmp2->position.x)>20) {
-                cout<<"Wrong in compute_gain!"<<endl;
-                mypause();
-                return 0;
-            }
+//            if (abs(target_tmp->position.x-target_tmp2->position.x)>20) {
+//                cout<<"Wrong in compute_gain!"<<endl;
+//                mypause();
+//                return 0;
+//            }
             gain+=correlation_node(&tracklet_pool[i],&detection[plan[i]]);
 //            target1=tracklet_pool[i].storage.back();
 //            target2=&detection[plan[i]];

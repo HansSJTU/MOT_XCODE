@@ -50,7 +50,7 @@ int main(){
     const std::string result_img = passp1 + UN + passp5 + DS + "/";
     const std::string feature_dir = passp1 + UN +passp2 +DS + passp4 + passp7;
     int start = 1;
-    int totalFrame = 300;
+    int totalFrame = 1000;
     int PicN = start + totalFrame - 1;
     cout<<"Checking <base_dir>   : "<<base_dir<<endl;
     cout<<"Checking <data_dir>   : "<<data_dir<<endl;
@@ -131,7 +131,7 @@ int main(){
     int tracklet_num=0;
     bool *target_link_flag;
     int difference;
-    int bound=20;
+    int bound=70;
     vector<int> plan;
     vector<int> one_to_one;
     for (int i = start-1; i < num_frame; ++i)
@@ -192,7 +192,7 @@ int main(){
             }
         }
         
-        update_relation(tracklet_pool);
+//        update_relation(tracklet_pool);
         
         for (int q = 0; q < target_num; ++q)
         {
