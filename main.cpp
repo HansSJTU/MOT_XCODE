@@ -16,9 +16,11 @@
 #include <stdlib.h>
 using namespace std;
 using namespace cv;
-// ************ User name Predefine ******* //
-#define USERNAME "Hans"
-//#define USERNAME "River"
+
+
+// ************ User name Predefine******* //
+//#define USERNAME "Hans"
+#define USERNAME "River"
 // ************ Dataset Predefine *********** //
 //#define Dataset "ADL-Rundle-1"
 //#define Dataset "ADL-Rundle-3"
