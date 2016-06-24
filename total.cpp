@@ -105,5 +105,5 @@ int hyp_all_count=0;
 int last_numtmp_hyp=-1;
 
 int Delete_Less_Than=8;
-int GLOBAL_DELETE_BUFFER=10;
+int GLOBAL_DELETE_BUFFER=7;
 

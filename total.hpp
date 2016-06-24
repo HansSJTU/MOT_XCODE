@@ -21,6 +21,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv/cvaux.hpp>
+#include <algorithm>
 #include "Vector2.hpp"
 #include "Matrix.h"
 

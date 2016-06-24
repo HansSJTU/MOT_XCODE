@@ -186,7 +186,7 @@ int main(){
         vector<int> plan(tracklet_num,-1);
         for (int j = 0; j < hyp_all.size(); ++j)
         {
-            object_current=compute_gain(DetectionArray[i],hyp_all[j]);
+            object_current=compute_gain(DetectionArray[i],hyp_all[j], candidate, i);
             if (object_current>max_object)
             {
                 max_object=object_current;

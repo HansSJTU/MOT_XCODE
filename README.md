@@ -4,7 +4,6 @@ This is for **Multiple Object Tracking**.
 
 ******
 ###Author: Hanxiao He, Junxian He
-###Email: river459@icloud.com
 
 ----------
 ##Contents
@@ -14,11 +13,8 @@ This is for **Multiple Object Tracking**.
 *********
 #Instances
 * The Fifth Canteen
-    * Frame 290
-    * Frame 760
-    * Frame 890
-    * Frame 893
-    * Frame 925 target 111
+    * Frame 290 
+    * Frame 348 (exchange)
 
 **********
 #Editing Notes

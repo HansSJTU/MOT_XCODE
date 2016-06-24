@@ -22,7 +22,8 @@ int global_delete(int k);
 //sigmoid function
 double sigmoid(double a,double b,double c);
 //Compute the cost
-double compute_gain(std::vector<PointVar> &detection,vector<int> &plan);
+double compute_gain(std::vector<PointVar> &detection,vector<int> &plan,
+                    vector<vector<int> > &candidate, int frame);
 //Get distance
 double GetDistance(Point t1,Point t2);
 //exchange int to string(add 0) (not used)
