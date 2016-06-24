@@ -14,7 +14,7 @@ This is for **Multiple Object Tracking**.
 #Instances
 * The Fifth Canteen
     * Frame 290 
-    * ~~Frame 348 (exchange)~~(see edition log1)
+    * ~~Frame 348 (exchange)~~ (see edition log1)
 
 **********
 #Edition Log
