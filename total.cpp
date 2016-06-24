@@ -17,9 +17,9 @@
 
 /********KITTI16/KITTI19*************/
 
-//const CvPoint ROI_LeftTop(75,70);
-//const CvPoint ROI_RightDown(1190,330);
-
+//const CvPoint ROI_LeftTop(0,0);
+//const CvPoint ROI_RightDown(1238,374);
+//
 //const CvPoint Border_LeftTop(0,0);
 //const CvPoint Border_RightDown(1238,374);
 /********************************/
@@ -73,7 +73,7 @@ std::vector<tracklet> tracklet_pool;
 std::vector<tracklet> all_tracklet;
 
 tracklet::tracklet(){
-    velocity=0;lambda1=0.5;lambda2=0.5;delete_counting=0;
+    velocity=0;lambda1=0.5;lambda2=0.5;delete_counting=0;printbool=1;
     relation.resize(tracklet_pool.size()+1,0);
 }
 
@@ -81,6 +81,7 @@ tracklet::tracklet(PointVar *target):velocity(0),lambda1(0.1),lambda2(0.9)
 {
     storage.push_back(target);
     delete_counting=0;
+    printbool=1;
     relation.resize(tracklet_pool.size()+1,0);
 }
 
@@ -103,5 +104,6 @@ vector<vector<int> > hyp_all;
 int hyp_all_count=0;
 int last_numtmp_hyp=-1;
 
-int calc_flag=0;//
+int Delete_Less_Than=8;
+int GLOBAL_DELETE_BUFFER=10;
 

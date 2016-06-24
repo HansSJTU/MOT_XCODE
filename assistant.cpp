@@ -196,12 +196,12 @@ double correlation_node(tracklet *track, PointVar *candidate){
     size=(int)track->storage.size();
     tmp=track->storage[size-1];
     
-//    simi_motion=correlation_motion(track,candidate);
+    simi_motion=correlation_motion(track,candidate);
     
     simi_app=CoAppearance(track,candidate);
     
-//    result=track->lambda1*simi_motion+track->lambda2*simi_app;
-    result=simi_app;
+    result=track->lambda1*simi_motion+track->lambda2*simi_app;
+//    result=simi_app;
 //    cout<<"\t\t"<<"simi_all: "<<result<<endl;
 
     return result;
@@ -553,18 +553,18 @@ double compute_gain(std::vector<PointVar> &detection,vector<int> &plan){
 //                cout<<"Wrong in compute_gain!"<<endl;
 //                mypause();
 //                return 0;
-//            }
+//        }
             gain+=correlation_node(&tracklet_pool[i],&detection[plan[i]]);
-//            target1=tracklet_pool[i].storage.back();
-//            target2=&detection[plan[i]];
-//            for (int j = 0; j < i; ++j)
-//            {
-//                if (plan[j]!=-1){
-//                    PointVar* target3=tracklet_pool[j].storage.back();
-//                    PointVar* target4=&detection[plan[j]];
-//                    gain-=sigmoid(tracklet_pool[i].relation[j],translation,width)*compute_distance_variation(target1,target2,target3,target4);
-//                }
-//            }
+            target1=tracklet_pool[i].storage.back();
+            target2=&detection[plan[i]];
+            for (int j = 0; j < i; ++j)
+            {
+                if (plan[j]!=-1){
+                    PointVar* target3=tracklet_pool[j].storage.back();
+                    PointVar* target4=&detection[plan[j]];
+                    gain-=sigmoid(tracklet_pool[i].relation[j],translation,width)*compute_distance_variation(target1,target2,target3,target4);
+                }
+            }
         }
     }
     
@@ -579,7 +579,7 @@ void global_push(tracklet &tmp){
     }
 }
 int global_delete(int k){
-    if (++tracklet_pool[k].delete_counting > 10 ){
+    if (++tracklet_pool[k].delete_counting > GLOBAL_DELETE_BUFFER ){
         all_tracklet.push_back(tracklet_pool[k]);
         for (int i = 0; i < tracklet_pool.size(); ++i){
             if ((int)tracklet_pool.size()==0) break;
