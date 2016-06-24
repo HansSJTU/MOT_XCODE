@@ -14,8 +14,9 @@ This is for **Multiple Object Tracking**.
 #Instances
 * The Fifth Canteen
     * Frame 290 
-    * Frame 348 (exchange)
+    * ~~Frame 348 (exchange)~~(see edition log1)
 
 **********
-#Editing Notes
+#Edition Log
+1. Consider relation from Frame 340 to Frame 355 to tackle the problem in Frame 348 (exchange) successfully. 
 
