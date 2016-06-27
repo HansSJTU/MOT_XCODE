@@ -19,8 +19,8 @@ using namespace cv;
 
 
 // ************ User name Predefine******* //
-//#define USERNAME "Hans"
-#define USERNAME "River"
+#define USERNAME "Hans"
+//#define USERNAME "River"
 // ************ Dataset Predefine *********** //
 //#define Dataset "ADL-Rundle-1"
 //#define Dataset "ADL-Rundle-3"
@@ -33,7 +33,8 @@ using namespace cv;
 //#define Dataset "Venice-1"
 //#define Dataset "PETS2009"
 //#define Dataset "TUD-Crossing"
-#define Dataset "canteenres"
+//#define Dataset "canteenres"
+#define Dataset "tianmuluv5"
 // ***************** End **************** //
 
 int main(){

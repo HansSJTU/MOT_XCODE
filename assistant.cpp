@@ -200,8 +200,9 @@ double correlation_node(tracklet *track, PointVar *candidate){
     
     simi_app=CoAppearance(track,candidate);
     
-//    result=track->lambda1*simi_motion+track->lambda2*simi_app;
+    result=track->lambda1*simi_motion+track->lambda2*simi_app;
     result=simi_app;
+//    cout<<"\t\t"<<"simi_all: "<<result<<endl;
 
     return result;
 }
@@ -552,19 +553,21 @@ double compute_gain(std::vector<PointVar> &detection,vector<int> &plan,
 
             gain+=correlation_node(&tracklet_pool[i],&detection[plan[i]]);
             
-            if (frame>340 && frame<355) {
-                vector<int>::iterator iter;
-                bool flag;
-                for (int j=0; j<i; j++) {
-                    iter=find(candidate[i].begin(),candidate[i].end(),plan[j]);
-                    flag=iter==candidate[i].end()?false:true;
-                    if (flag) {
-                        target1_track2=tracklet_pool[j].storage.back();
-                        target2_track2=&detection[plan[j]];
-                        gain+=compute_distance_variation(target_tmp, target_tmp2, target1_track2, target2_track2);
-                    }
-                }
-            }
+//            if (frame>340 && frame<355) {
+//                vector<int>::iterator iter;
+//                bool flag;
+//                for (int j=0; j<i; j++) {
+//                    iter=find(candidate[i].begin(),candidate[i].end(),plan[j]);
+//                    flag=iter==candidate[i].end()?false:true;
+//                    if (flag) {
+//                        target1_track2=tracklet_pool[j].storage.back();
+//                        target2_track2=&detection[plan[j]];
+//                        gain+=compute_distance_variation(target_tmp, target_tmp2, target1_track2, target2_track2);
+//                    }
+//                }
+//            }
+            
+
             
 //            target1=tracklet_pool[i].storage.back();
 //            target2=&detection[plan[i]];

@@ -24,7 +24,7 @@
 //const CvPoint Border_RightDown(1238,374);
 /********************************/
 
-/********canteenres*************/
+/********Canteenres_5/Tianmu_Road*************/
 const CvPoint ROI_LeftTop(0,0);
 const CvPoint ROI_RightDown(640,480);
 
