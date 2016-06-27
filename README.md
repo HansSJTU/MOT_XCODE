@@ -2,16 +2,14 @@ MOT
 -------------
 This is for **Multiple Object Tracking**.
 
-******
-###Author: Hanxiao He, Junxian He
-
+Author: Hanxiao He, Junxian He
 ----------
 ##Contents
 1. [Instances](#Instances)  
 2. [Editing Notes](#Editing Notes)
 
 *********
-#Instances
+##Instances
 * The Fifth Canteen
     * Frame 290 
     * ~~Frame 348 (exchange)~~ (see edition log1)
@@ -24,5 +22,5 @@ This is for **Multiple Object Tracking**.
     * 4586 (wrong detection)
     * 4687-4688 (lacking detection caused exchange)
 **********
-#Edition Log
+##Edition Log
 1. Consider relation from Frame 340 to Frame 355 to tackle the problem in Frame 348 (exchange) successfully. 

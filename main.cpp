@@ -33,8 +33,8 @@ using namespace cv;
 //#define Dataset "Venice-1"
 //#define Dataset "PETS2009"
 //#define Dataset "TUD-Crossing"
-#define Dataset "canteenres"
-//#define Dataset "tianmuluv5"
+//#define Dataset "canteenres"
+#define Dataset "tianmuluv5"
 // ***************** End **************** //
 
 int main(){
@@ -53,7 +53,7 @@ int main(){
     const std::string result_img = passp1 + UN + passp5 + DS + "/";
     const std::string feature_dir = passp1 + UN +passp2 +DS + passp4 + passp7;
     int start = 1;
-    int totalFrame = 4700;
+    int totalFrame = 5000;
     int PicN = start + totalFrame - 1;
     cout<<"Checking <base_dir>   : "<<base_dir<<endl;
     cout<<"Checking <data_dir>   : "<<data_dir<<endl;
