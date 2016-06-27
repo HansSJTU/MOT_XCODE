@@ -71,6 +71,9 @@ extern int Delete_Less_Than;
 
 //buffer of lost in frames
 extern int GLOBAL_DELETE_BUFFER;
+
+//boundary of the neighbourhood
+extern int bound;
 /**********************************End Variable************************************/
 /**********************************************************************************/
 /*****************************Sturcture Declaration********************************/

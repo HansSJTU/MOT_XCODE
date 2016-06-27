@@ -33,8 +33,8 @@ using namespace cv;
 //#define Dataset "Venice-1"
 //#define Dataset "PETS2009"
 //#define Dataset "TUD-Crossing"
-//#define Dataset "canteenres"
-#define Dataset "tianmuluv5"
+#define Dataset "canteenres"
+//#define Dataset "tianmuluv5"
 // ***************** End **************** //
 
 int main(){
@@ -53,13 +53,13 @@ int main(){
     const std::string result_img = passp1 + UN + passp5 + DS + "/";
     const std::string feature_dir = passp1 + UN +passp2 +DS + passp4 + passp7;
     int start = 1;
-    int totalFrame = 1000;
+    int totalFrame = 4700;
     int PicN = start + totalFrame - 1;
     cout<<"Checking <base_dir>   : "<<base_dir<<endl;
     cout<<"Checking <data_dir>   : "<<data_dir<<endl;
     cout<<"Checking <feature_dir>: "<<feature_dir<<endl;
     //***************** Reading data into memory********************//
-    cout<<"\n***************** Reading Data *****************\n\n";
+    cout<<"\n***************** Reading Data *****************\n";
     cout<<"\n*************************  Reading det\n";
     std::vector<string> PicArray;
     std::string Txtname, Listname,Imglist;
@@ -148,7 +148,7 @@ int main(){
     int tracklet_num=0;
     bool *target_link_flag;
     int difference;
-    int bound=70;
+    
     vector<int> plan;
     vector<int> one_to_one;
     for (int i = start-1; i < num_frame; ++i)

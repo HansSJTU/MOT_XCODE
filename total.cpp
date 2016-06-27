@@ -106,4 +106,4 @@ int last_numtmp_hyp=-1;
 
 int Delete_Less_Than=8;
 int GLOBAL_DELETE_BUFFER=7;
-
+int bound=70;
