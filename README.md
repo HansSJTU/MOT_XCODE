@@ -1,14 +1,14 @@
-MOT
--------------
+#MOT Challenge
 This is for **Multiple Object Tracking**.
 
-Author: Hanxiao He, Junxian He
-----------
-##Contents
-1. [Instances](#Instances)  
-2. [Editing Notes](#Editing Notes)
+Author: *Hanxiao He*, *Junxian He*
 
-*********
+
+##Contents
+1. [Instances](##Instances)  
+2. [Editing Notes](##Editing Notes)
+
+
 ##Instances
 * The Fifth Canteen
     * Frame 290 
@@ -21,6 +21,6 @@ Author: Hanxiao He, Junxian He
     * 4577 (exchange)
     * 4586 (wrong detection)
     * 4687-4688 (lacking detection caused exchange)
-**********
+
 ##Edition Log
 1. Consider relation from Frame 340 to Frame 355 to tackle the problem in Frame 348 (exchange) successfully. 
