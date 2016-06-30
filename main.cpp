@@ -27,14 +27,14 @@ using namespace cv;
 //#define Dataset "Town-Center"
 //#define Dataset "KITTI-16"
 //#define Dataset "ETH-Crossing"
-//#define Dataset "ETH-Jelmoli"
+#define Dataset "ETH-Jelmoli"
 //#define Dataset "ETH-Linthescher"
 //#define Dataset "KITTI-19"
 //#define Dataset "Venice-1"
 //#define Dataset "PETS2009"
 //#define Dataset "TUD-Crossing"
 //#define Dataset "canteenres"
-#define Dataset "tianmuluv5"
+//#define Dataset "tianmuluv5"
 // ***************** End **************** //
 
 int main(){
@@ -53,7 +53,7 @@ int main(){
     const std::string result_img = passp1 + UN + passp5 + DS + "/";
     const std::string feature_dir = passp1 + UN +passp2 +DS + passp4 + passp7;
     int start = 1;
-    int totalFrame = 5000;
+    int totalFrame = 3000;
     int PicN = start + totalFrame - 1;
     cout<<"Checking <base_dir>   : "<<base_dir<<endl;
     cout<<"Checking <data_dir>   : "<<data_dir<<endl;
@@ -118,7 +118,6 @@ int main(){
             feature_tmp=new double[1024];
             int checkframe,checkid;
             feature>>checkframe>>checkid;
-            
             //checking detection feature index
             if (checkframe != i+1 || checkid != DetectionArray[i][j].id){
                 cout<<"<ERROR in main:reading feature> Detection feature index not matching!\n";
@@ -153,7 +152,7 @@ int main(){
     vector<int> one_to_one;
     for (int i = start-1; i < num_frame; ++i)
     {
-        if (i%100==0) {
+        if (i%20==0) {
             cout<<i<<endl;
         }
         difference=0;
@@ -170,11 +169,30 @@ int main(){
         candidate.assign(tracklet_num,vector<int>(0,0));
         for (int m=0; m<tracklet_num; m++) {
             PointVar *tmp=tracklet_pool[m].storage.back();
+            Vector2<double> Track_v = tracklet_pool[m].velocity;
             int dele_count = tracklet_pool[m].delete_counting;
             for (int n=0; n<target_num; n++) {
-                if ((abs(DetectionArray[i][n].position.x-tmp->position.x)<bound+5*dele_count) &&
-                        (abs(DetectionArray[i][n].position.y-tmp->position.y)<bound+5*dele_count)) {
-                    candidate[m].push_back(n);
+                if (Track_v.absolute() == 0) {
+                    if ((abs(DetectionArray[i][n].position.x-tmp->position.x)<bound+5*dele_count) &&
+                            (abs(DetectionArray[i][n].position.y-tmp->position.y)<bound+5*dele_count)) {
+                        candidate[m].push_back(n);
+                    }
+                }
+                else {
+                    double bd1,bd2;
+                    if (dele_count==0){
+                        bd1 = 15 + 2 * abs(Track_v.x);
+                        bd2 = 15 + 2 * abs(Track_v.y);
+                    }
+                    else {
+                        bd1 = 15 + (abs(Track_v.x) + 2) * (dele_count + 2);
+                        bd2 = 15 + (abs(Track_v.y) + 2) * (dele_count + 2);
+                    }
+                    if ((abs(DetectionArray[i][n].position.x-tmp->position.x) < bd1) &&
+                        (abs(DetectionArray[i][n].position.y-tmp->position.y) < bd2)) {
+                        cout<<bd1<<"\t"<<bd2<<endl;
+                        candidate[m].push_back(n);
+                    }
                 }
             }
         }
@@ -232,11 +250,11 @@ int main(){
     
     std::vector<CvScalar> sVec;
     GetScalar(sVec);	//Get Color Vector
-    VideoWriter writer(out_dir, CV_FOURCC('D', 'I', 'V', 'X'), 1, Size(1238,374));
-    if (writer.isOpened()!=true){
-        cout<<"ERROR in <main:VideoWriter>: initial failed!\n\n";
-        mypause();
-    }
+//    VideoWriter writer(out_dir, CV_FOURCC('D', 'I', 'V', 'X'), 1, Size(1238,374));
+//    if (writer.isOpened()!=true){
+//        cout<<"ERROR in <main:VideoWriter>: initial failed!\n\n";
+//        mypause();
+//    }
     std::cout << "\n\n************************* START DRAWING ********************** \n\n" ;
     vector<vector<int>> trackletindex;
     vector<vector<int>> pointvarindex;
@@ -301,7 +319,7 @@ int main(){
     // ***END PRINT*** //
     std::cout<<"----------------------- Begin Draw --------------------------"<<std::endl;
     cout<<"Output direction check: "<<result_img<<endl;
-    mypause();
+    //mypause();
     cout<<"\n*************************  Output img\n";
     string rm_ins = "rm -r ";
     rm_ins = rm_ins + result_img;
@@ -382,7 +400,7 @@ int main(){
 
       //  writer << src;
     }
-    writer.release();
+    //writer.release();
     std::cout<<"\n------------------------- END -------------------------------"<<std::endl;
     return 0;
 }

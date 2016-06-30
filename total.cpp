@@ -24,7 +24,7 @@
 //const CvPoint Border_RightDown(1238,374);
 /********************************/
 
-/********Canteenres_5/Tianmu_Road*************/
+/********Canteenres_5/Tianmu_Road/ETH-Jemoli*************/
 const CvPoint ROI_LeftTop(0,0);
 const CvPoint ROI_RightDown(640,480);
 
@@ -77,7 +77,7 @@ tracklet::tracklet(){
     relation.resize(tracklet_pool.size()+1,0);
 }
 
-tracklet::tracklet(PointVar *target):velocity(0),lambda1(0.1),lambda2(0.9)
+tracklet::tracklet(PointVar *target):velocity(0),lambda1(0.5),lambda2(0.5)
 {
     storage.push_back(target);
     delete_counting=0;
@@ -104,6 +104,6 @@ vector<vector<int> > hyp_all;
 int hyp_all_count=0;
 int last_numtmp_hyp=-1;
 
-int Delete_Less_Than=8;
+int Delete_Less_Than=5;
 int GLOBAL_DELETE_BUFFER=7;
-int bound=50;
+int bound=30;

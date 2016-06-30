@@ -42,8 +42,9 @@ double correlation_node(tracklet *track, PointVar *candidate);
 void update_relation(std::vector<tracklet> &tracklet_pool);
 //computer distance difference
 double compute_distance_variation(const PointVar *tracklet1_a,const PointVar *tracklet1_b,const PointVar *tracklet2_a,const PointVar *tracklet2_b);
-//updating velocity
+//updating velocity and appearance
 void update_velocity(tracklet *track);
+void update_appearance(tracklet *track);
 //adding a PointVar to a Tracklet
 void add_P2T(tracklet *track, PointVar *newdetection);
 //hypothesis number

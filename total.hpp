@@ -136,6 +136,7 @@ public:
     double lambda1;
     double lambda2;
 public:
+    double current_app[1024];
     tracklet();
     tracklet(PointVar *target);
     //~tracklet();

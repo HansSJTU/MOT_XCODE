@@ -81,8 +81,6 @@ void CoAppearance_test(){
     //DetectionArray[1][0].print();
     cout << app_f1;
 }
-void Comotion_test(){
-}
 void A_test(int a, int b){
     std::cout<<A(a,b);
 }
@@ -90,15 +88,21 @@ void A_test(int a, int b){
 double CoAppearance(tracklet *pre,PointVar *next){
     double totalsum=0;
     double sum1=0,sum2=0;
-    int trackletsize=(int)pre->storage.size();
     double *preap, *nextap;
-    preap=pre->storage[trackletsize-1]->apfeature;
-    nextap=next->apfeature;
+    int trackletsize=(int)pre->storage.size();
+    preap = pre->storage[trackletsize-1]->apfeature;
+//    if (trackletsize<=2)
+//        preap = pre->storage[trackletsize-1]->apfeature;
+//    else
+//        preap = pre->current_app;
+    nextap = next->apfeature;
     for (int i=0 ; i < 1024 ; i ++){
         totalsum += preap[i] * nextap[i];
         sum1+=preap[i]*preap[i];
         sum2+=nextap[i]*nextap[i];
+        //totalsum += (preap[i] - nextap[i]) * (preap[i] - nextap[i]);
     }
+    //totalsum /= 1024;
     totalsum /= sqrt(sum1*sum2);
     return totalsum;
 }
@@ -171,21 +175,35 @@ bool InBorder(Point t){
         return false;
 }
 double correlation_motion(tracklet *track,PointVar *candidate){
-    double result,distance;
-    Vector2<double> vector1,vector2,velocity;
+    if (track->storage.size()<4) return 0;
+    double result;
+    Vector2<double> vector1,vector2,velocity,velocity_dif;
     PointVar* tmp;
     int scale=0;
     velocity=track->velocity;
     scale=(int)track->storage.size();
-    tmp=track->storage[scale-1];
+    tmp=track->storage[scale-3];
     vector1=tmp->position;
-    vector2=candidate->position;
-    vector2=(vector2-vector1)/(candidate->frame-tmp->frame);
+    Vector2<double> p1 = track->storage[scale-4]->position;
+    Vector2<double> p2 = track->storage[scale-2]->position;
     
+    p1 = vector1 + (p1 - vector1)/(track->storage[scale-3]->frame - track->storage[scale-4]->frame);
+    p2 = vector1 + (p2 - vector1)/(track->storage[scale-2]->frame - track->storage[scale-3]->frame);
+    vector1 = (p1 + p2 + vector1)/3;
+    vector2 = candidate->position;
+    vector2 = (vector2-vector1)/(candidate->frame-tmp->frame);
+    velocity_dif = vector2 - velocity;
     if (velocity.absolute()==0 || vector2.absolute()==0)
         result=0;
-    else
-        result=Vector2<double>::dotProduct(velocity,vector2)/(velocity.absolute()*vector2.absolute());
+    else{
+        double angle_dif = Vector2<double>::dotProduct(velocity,vector2)/(velocity.absolute()*vector2.absolute());
+//        if (angle_dif<0)
+//            result = angle_dif * double(velocity_dif.absolute());
+//        else
+//            result = angle_dif / double(velocity_dif.absolute());
+        result = (angle_dif+1)/2;
+        //cout<<angle_dif<<endl;
+    }
     return result;
 }
 double correlation_node(tracklet *track, PointVar *candidate){
@@ -201,9 +219,9 @@ double correlation_node(tracklet *track, PointVar *candidate){
     simi_app=CoAppearance(track,candidate);
     
     result=track->lambda1*simi_motion+track->lambda2*simi_app;
-    result=simi_app;
+ //   result=simi_app;
 //    cout<<"\t\t"<<"simi_all: "<<result<<endl;
-
+//    cout<<simi_motion<<"\t"<<simi_app<<"\n";
     return result;
 }
 void update_relation(std::vector<tracklet> &tracklet_pool){
@@ -260,15 +278,42 @@ double compute_distance_variation(const PointVar *tracklet1_a,const PointVar *tr
 }
 void update_velocity(tracklet *track){
     int size=(int)track->storage.size();
-    if (size <=1 ) return;
+    if (size == 1) return;
+    if (size <= 6) {
+        track->velocity = (track->storage[size-1]->position - track->storage[0]->position) / (track->storage[size-1]->frame - track->storage[0]->frame);
+        return;
+    }
     //cout<<"track->storage[size-1]->frame:"<<track->storage[size-1]->frame<<'\n';
     //cout<<"track->storage[size-2]->frame:"<<track->storage[size-2]->frame<<'\n';
-    track->velocity=(track->storage[size-1]->position-track->storage[size-2]->position)/(track->storage[size-1]->frame-track->storage[size-2]->frame);
+    Vector2<double> position_queue[6];
+    position_queue[0] = track->storage[size-1]->position;//1
+    position_queue[1] = track->storage[size-2]->position;//2
+    position_queue[2] = track->storage[size-3]->position;//3
+    position_queue[3] = track->storage[size-4]->position;//4
+    position_queue[4] = track->storage[size-5]->position;//5
+    position_queue[5] = track->storage[size-6]->position;//6
+    
+    position_queue[0] = position_queue[1] + (position_queue[0] - position_queue[1])/(track->storage[size-1]->frame - track->storage[size-2]->frame);
+    position_queue[2] = position_queue[1] + (position_queue[2] - position_queue[1])/(track->storage[size-2]->frame - track->storage[size-3]->frame);
+    position_queue[3] = position_queue[4] + (position_queue[3] - position_queue[4])/(track->storage[size-3]->frame - track->storage[size-4]->frame);
+    position_queue[5] = position_queue[4] + (position_queue[5] - position_queue[4])/(track->storage[size-4]->frame - track->storage[size-5]->frame);
+    
+    
+    track->velocity=((position_queue[0]+position_queue[1]+position_queue[2])/3-(position_queue[3]+position_queue[4]+position_queue[5])/3)/(track->storage[size-2]->frame-track->storage[size-5]->frame);
+    //cout<<track->velocity<<endl;
     return;
+}
+void update_appearance(tracklet *track){
+    int size=(int)track->storage.size();
+    if (size <=2 ) return;
+    for (int i=0 ; i<=1023 ; i++){
+        track->current_app[i] = (track->storage[size-1]->apfeature[i]+track->storage[size-2]->apfeature[i]+track->storage[size-3]->apfeature[i])/3;
+    }
 }
 void add_P2T(tracklet *track, PointVar *newdetection){
     track->storage.push_back(newdetection);
     update_velocity(track);
+    update_appearance(track);
 }
 int cnt_tracklet(Matrix *hypothesis){
     int row=hypothesis->rows;
@@ -433,16 +478,22 @@ void generate_all_possibility2(const vector<vector<int> > &candidate,
         generate_all_possibility2(candidate, pos+1,plan, one_to_one);
     }
     else{
-        for (int i=0; i<candidate[pos].size(); i++) {
-            if (one_to_one[candidate[pos][i]]==0) {
-                if (!flag) {
-                    flag=true;
+        for (int i=0; i<candidate[pos].size()+1; i++) {
+            if (i == candidate[pos].size()){
+                plan[pos]=-1;
+                generate_all_possibility2(candidate, pos+1,plan, one_to_one);
+            }
+            else {
+                if (one_to_one[candidate[pos][i]]==0) {
+                    if (!flag) {
+                        flag=true;
+                    }
+                    plan[pos]=candidate[pos][i];
+                    one_to_one[candidate[pos][i]]=1;
+                    generate_all_possibility2(candidate, pos+1, plan, one_to_one);
+                    one_to_one[candidate[pos][i]]=0;
+                    flag=false;
                 }
-                plan[pos]=candidate[pos][i];
-                one_to_one[candidate[pos][i]]=1;
-                generate_all_possibility2(candidate, pos+1, plan, one_to_one);
-                one_to_one[candidate[pos][i]]=0;
-                flag=false;
             }
         }
         if (!flag) {
