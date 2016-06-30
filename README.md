@@ -47,6 +47,12 @@ Author: *Hanxiao He*, *Junxian He*
     * 4512 exchange caused by loss detection 
     * 4965 exchange caused by loss detection
     * 4987 exchange caused by wrong detection
+
+##To Do List
+
+1. Add the weight for appearance and motion
+
+
 ##Edition Log
 
 1. Consider relation from Frame 340 to Frame 355 to tackle the problem in Frame 348 (exchange) successfully. 
@@ -59,3 +65,11 @@ Author: *Hanxiao He*, *Junxian He*
 
 ####2016.6.29
 * Add the plan with the person link to nobody, thus can address the module problem that prefer to link rather than start a new tracklet.
+
+####2016.6.30
+* Fixed motion model issue mentioned in 2016.6.28
+* Seminar
+    * E-mail MOT author, asking for detection
+    * Try to run Ouyang's detection on MOT dataset
+    * Start valuating the weight for nodes and edges
+
