@@ -3,7 +3,6 @@ This is for **Multiple Object Tracking**.
 
 Author: *Hanxiao He*, *Junxian He*
 
-
 ##Contents
 1. [Instances](##Instances)
 2. [To Do List](##To Do List)

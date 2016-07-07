@@ -23,7 +23,7 @@
 #include <opencv/cvaux.hpp>
 #include <algorithm>
 #include "Vector2.hpp"
-#include "Matrix.h"
+//#include "Matrix.h"
 
 #pragma comment(lib, "mclmcrrt.lib")
 #pragma comment(lib, "mclmcr.lib")
@@ -66,6 +66,13 @@ extern vector<vector<int> > hyp_all;
 extern int hyp_all_count;
 extern int last_numtmp_hyp;
 
+//max plan
+extern double max_plan;
+extern vector<int> best_plan;
+
+//simiINDEX
+extern double* simiIndex;
+
 //Variable used in print results, if detections in a tracklet is less than it, not print
 extern int Delete_Less_Than;
 
@@ -97,7 +104,15 @@ public:
         std::cout<<"Frame:"<<frame<<" ID:"<<id<<" x:"<<position.x<<" y:"<<position.y<<" width:"<<width<<" height:"<<height<<" confidence: "<<trust<<'\n';
     }
     void drawprint(){
-        std::cout<<"Frame:"<<frame<<" x:"<<position.x-width/2<<" y:"<<position.y-width/2<<" width:"<<width<<" height:"<<height<<'\n';
+        std::cout<<"Frame:"<<frame<<" x:"<<position.x-width/2<<" y:"<<position.y-height/2<<" width:"<<width<<" height:"<<height<<'\n';
+    }
+    double* output(){
+        double* returnvalue = new double[4];
+        returnvalue[0] = position.x-width/2;
+        returnvalue[1] = position.y-height/2;
+        returnvalue[2] = width;
+        returnvalue[3] = height;
+        return returnvalue;
     }
     PointVar(int frame1,double x1, double y1, double width1, double height1, double trust1, int ID1){
         cv::Point Border_lt = Border_LeftTop;
@@ -116,7 +131,7 @@ public:
         delet=false;
         apfeature=NULL;
         //if(width < 10 || height < 10) delet=true;
-        if (! ((int)x1 > Border_lt.x && (int)x1 < Border_rd.x && (int)y1 > Border_lt.y && (int)y1 < Border_rd.y))
+        if ((! ((int)x1 > Border_lt.x && (int)x1 < Border_rd.x && (int)y1 > Border_lt.y && (int)y1 < Border_rd.y))|| trust<0.9)
             delet=true;
     }
     PointVar(){}
@@ -124,6 +139,7 @@ public:
     ~PointVar(){
         delete []apfeature;
     }
+    
 };
 //Tracklet Structure
 class tracklet{
@@ -136,13 +152,13 @@ public:
     double lambda1;
     double lambda2;
 public:
-    double current_app[1024];
+    //double current_app[1024];
     tracklet();
     tracklet(PointVar *target);
     //~tracklet();
 };
 //DetectionArray saving all detections
-extern std::vector<std::vector<PointVar>> DetectionArray;
+extern std::vector<std::vector<PointVar> > DetectionArray;
 //Current tracklets
 extern std::vector<tracklet> tracklet_pool;
 //All Tracklets

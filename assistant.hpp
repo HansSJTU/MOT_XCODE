@@ -13,7 +13,7 @@
 # include "total.hpp"
 
 //Read Detection Data into DetectionArray
-extern std::vector<std::vector<PointVar>> DetectionArray;
+extern std::vector<std::vector<PointVar> > DetectionArray;
 extern std::vector<tracklet> tracklet_pool;
 //push back a tracklet globally(including tracklet pool,all_tracklet and the relation vector in each tracklet)
 void global_push(tracklet &tmp);
@@ -23,7 +23,7 @@ int global_delete(int k);
 double sigmoid(double a,double b,double c);
 //Compute the cost
 double compute_gain(std::vector<PointVar> &detection,vector<int> &plan,
-                    vector<vector<int> > &candidate, int frame);
+                    vector<vector<int> > &candidate, int frame, double* simiIndex);
 //Get distance
 double GetDistance(Point t1,Point t2);
 //exchange int to string(add 0) (not used)
@@ -48,7 +48,7 @@ void update_appearance(tracklet *track);
 //adding a PointVar to a Tracklet
 void add_P2T(tracklet *track, PointVar *newdetection);
 //hypothesis number
-int cnt_tracklet(Matrix *hypothesis);
+//int cnt_tracklet(Matrix *hypothesis);
 //A function
 int A(int a,int b);
 //Swap function
@@ -63,14 +63,15 @@ void comb_main(int n,int m);//top api
 void Comb(int step, int n, int m,int* list);
 //Generate all A(n,m) possibility
 void generate_all_possibility(int n,int m);
-void generate_all_possibility2(const vector<vector<int> > &candidate,
-                               int pos, vector<int> &plan, vector<int> one_to_one);
+void generate_all_possibility2(vector<vector<int> > &candidate,
+                               int pos, vector<int> &plan, vector<int> one_to_one,int trackletID);
+void generate_best_plan(vector<vector<int> > &candidate,vector<int> &plan,vector<int> one_to_one,int trackletID);
 //rectangle color define
 void GetScalar(std::vector<CvScalar> &sVec);
 
 //*************Testing Functions****************//
 //Test Reading
-void ReadingExam(std::vector<std::vector<PointVar>> &Array,vector<string> &img_list);
+void ReadingExam(std::vector<std::vector<PointVar> > &Array,vector<string> &img_list);
 //Test Coappearance
 void CoAppearance_test();
 //Test Comotion

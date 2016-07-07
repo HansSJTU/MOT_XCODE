@@ -16,20 +16,20 @@
 #include <stdlib.h>
 using namespace std;
 using namespace cv;
-
-
+// ***************** Mode **************** //
+#define MODE 0  // 0 MAC, 1 LINUX
 // ************ User name Predefine******* //
 #define USERNAME "Hans"
 //#define USERNAME "River"
 // ************ Dataset Predefine *********** //
 //#define Dataset "ADL-Rundle-1"
 //#define Dataset "ADL-Rundle-3"
-//#define Dataset "Town-Center"
+//#define Dataset "AVG-TownCentre"
 //#define Dataset "KITTI-16"
 //#define Dataset "ETH-Crossing"
-#define Dataset "ETH-Jelmoli"
+//#define Dataset "ETH-Jelmoli"
 //#define Dataset "ETH-Linthescher"
-//#define Dataset "KITTI-19"
+#define Dataset "KITTI-19"
 //#define Dataset "Venice-1"
 //#define Dataset "PETS2009"
 //#define Dataset "TUD-Crossing"
@@ -38,22 +38,36 @@ using namespace cv;
 // ***************** End **************** //
 
 int main(){
-    string UN = USERNAME;
     string DS = Dataset;
-    string passp1 = "/Users/";
-    string passp2 = "/Desktop/Xcode_MOT/2DMOT2015/test/";
     string passp3 = "/img1/";
     string passp4 = "/det/";
-    string passp5 = "/Desktop/Xcode_MOT/Result_IMGs/";
     string passp6 = ".avi";
     string passp7 = "feature.txt";
+#if MODE == 0
+    string UN = USERNAME;
+    string passp1 = "/Users/";
+    string passp2 = "/Desktop/Xcode_MOT/2DMOT2015/test/";
+    string passp5 = "/Desktop/Xcode_MOT/Result_IMGs/";
+    string passp8= "/Desktop/Xcode_MOT/Upload/";
     const std::string base_dir = passp1 + UN + passp2 + DS + passp3;
     const std::string data_dir = passp1 + UN + passp2 + DS + passp4;
     const std::string out_dir = passp1 + UN + passp5 + DS + passp6;
     const std::string result_img = passp1 + UN + passp5 + DS + "/";
     const std::string feature_dir = passp1 + UN +passp2 +DS + passp4 + passp7;
+    const std::string upload_dir = passp1 + UN + passp8;
+#elif MODE == 1
+    string passp1 = "/home/sam/Desktop/Xcode_MOT/2DMOT2015/test/";
+    string passp5 = "/home/sam/Desktop/Xcode_MOT/Result_IMGs/";
+    string passp8= "/home/sam/Desktop/Xcode_MOT/Upload/";
+    const string base_dir = passp1 + DS + passp3;
+    const string data_dir = passp1 + DS + passp4;
+    const string out_dir = passp5 + DS + passp6;
+    const string result_img = passp5 + DS + "/";
+    const string feature_dir = passp1 + DS + passp4 + passp7;
+    const std::string upload_dir = passp8;
+#endif
     int start = 1;
-    int totalFrame = 3000;
+    int totalFrame = 2000;
     int PicN = start + totalFrame - 1;
     cout<<"Checking <base_dir>   : "<<base_dir<<endl;
     cout<<"Checking <data_dir>   : "<<data_dir<<endl;
@@ -66,15 +80,17 @@ int main(){
     Txtname = data_dir+"data.txt";
     Listname = data_dir+"list.txt";
     Imglist = base_dir + "img_list.txt";
-    ifstream fin_data(Txtname);
-    ifstream fin_list(Listname);
-    ifstream fin_imglist(Imglist);      //preparing path and filename
+    ifstream fin_data(Txtname.c_str());
+    ifstream fin_list(Listname.c_str());
+    ifstream fin_imglist(Imglist.c_str());      //preparing path and filename
     int totalframe;			//checking the total frames
     fin_imglist>>totalframe;
     if (PicN>totalframe) {
         cout<<"Warning in <main:PicN>: Exceeding Frame!\n";mypause();
         PicN = totalframe;
     }
+    std::vector<int> deleteFrame;
+    std::vector<int> deleteID;
     int star_count = 0; //to count print "*"
     for(int i = 0; i < PicN; i++){
         for (int star_count_tmp=0 ; star_count_tmp <(int) ((i+1)/double(PicN)*100/4-star_count) ;star_count_tmp++){
@@ -96,6 +112,10 @@ int main(){
             if (!tmp.delete_judge()){       // delete some detections
                 OneDetection.push_back(tmp);
             }
+            else {
+                deleteFrame.push_back(frame);
+                deleteID.push_back(j);
+            }
         }
         DetectionArray.push_back(OneDetection);
     }
@@ -106,18 +126,29 @@ int main(){
     //mypause();
     cout<<"\n*************************  Reading features\n";
     star_count = 0;
-    ifstream feature(feature_dir);
-    for (int i=0; i <= DetectionArray.size() - 1 ;i++){
+    int delete_count = 0;
+    ifstream feature(feature_dir.c_str());
+    for (int i=0; i <= int(DetectionArray.size()) - 1 ;i++){
         for (int star_count_tmp=0 ; star_count_tmp <(int) ((i+1)/double(DetectionArray.size())*100/4-star_count) ;star_count_tmp++){
             cout<<"*";
         }
         star_count=(int) (i+1)/double(DetectionArray.size())*100/4;
-        for (int j = 0; j <= DetectionArray[i].size() - 1; j++){
+        for (int j = 0; j <= int(DetectionArray[i].size()) - 1; j++){
             if (DetectionArray[i].size() == 0) break;
             double* feature_tmp;
             feature_tmp=new double[1024];
             int checkframe,checkid;
             feature>>checkframe>>checkid;
+            if (checkframe == deleteFrame[delete_count] && checkid == deleteID[delete_count]) {
+                j--;
+                delete_count++;
+                for (int i_tp = 0; i_tp <= 1023; i_tp ++){
+                    double tmp_wr;
+                    feature>>tmp_wr;
+                }
+                //cout<<checkframe<<"\t"<<checkid<<endl;
+                continue;
+            }
             //checking detection feature index
             if (checkframe != i+1 || checkid != DetectionArray[i][j].id){
                 cout<<"<ERROR in main:reading feature> Detection feature index not matching!\n";
@@ -152,14 +183,15 @@ int main(){
     vector<int> one_to_one;
     for (int i = start-1; i < num_frame; ++i)
     {
-        if (i%20==0) {
-            cout<<i<<endl;
+        if (i%2==0) {
+            //cout<<i<<endl;
         }
         difference=0;
         target_num=(int)DetectionArray[i].size();
         tracklet_num=(int)tracklet_pool.size();
         if (target_num==0) continue;
         max_object=-10000;
+        max_plan=-10000;
         target_link_flag=new bool[target_num];
         for (int p = 0; p < target_num; ++p)
         {
@@ -167,53 +199,80 @@ int main(){
         }
         vector<vector<int> > candidate;
         candidate.assign(tracklet_num,vector<int>(0,0));
+        cout<<i+1<<endl;
+        double all_can=1;
         for (int m=0; m<tracklet_num; m++) {
             PointVar *tmp=tracklet_pool[m].storage.back();
-            Vector2<double> Track_v = tracklet_pool[m].velocity;
             int dele_count = tracklet_pool[m].delete_counting;
+            
             for (int n=0; n<target_num; n++) {
-                if (Track_v.absolute() == 0) {
-                    if ((abs(DetectionArray[i][n].position.x-tmp->position.x)<bound+5*dele_count) &&
-                            (abs(DetectionArray[i][n].position.y-tmp->position.y)<bound+5*dele_count)) {
-                        candidate[m].push_back(n);
-                    }
+                if ((abs(DetectionArray[i][n].position.x-tmp->position.x)<tmp->width*0.5) && (abs(DetectionArray[i][n].position.y-tmp->position.y)<tmp->width*0.5)) {
+                    candidate[m].push_back(n);
                 }
-                else {
-                    double bd1,bd2;
-                    if (dele_count==0){
-                        bd1 = 15 + 2 * abs(Track_v.x);
-                        bd2 = 15 + 2 * abs(Track_v.y);
-                    }
-                    else {
-                        bd1 = 15 + (abs(Track_v.x) + 2) * (dele_count + 2);
-                        bd2 = 15 + (abs(Track_v.y) + 2) * (dele_count + 2);
-                    }
-                    if ((abs(DetectionArray[i][n].position.x-tmp->position.x) < bd1) &&
-                        (abs(DetectionArray[i][n].position.y-tmp->position.y) < bd2)) {
-                        cout<<bd1<<"\t"<<bd2<<endl;
-                        candidate[m].push_back(n);
-                    }
-                }
+                //This is for linking the people according to the speed
+//                Vector2<double> Track_v = tracklet_pool[m].velocity;
+//                if (Track_v.absolute() == 0) {
+//                    if ((abs(DetectionArray[i][n].position.x-tmp->position.x)<bound+5*dele_count) &&
+//                            (abs(DetectionArray[i][n].position.y-tmp->position.y)<bound+5*dele_count)) {
+//                        candidate[m].push_back(n);
+//                    }
+//                }
+//                else {
+//                    double bd1,bd2;
+//                    if (dele_count==0){
+//                        bd1 = 15 + 2 * abs(Track_v.x);
+//                        bd2 = 15 + 2 * abs(Track_v.y);
+//                    }
+//                    else {
+//                        bd1 = 15 + (abs(Track_v.x) + 2) * (dele_count + 2);
+//                        bd2 = 15 + (abs(Track_v.y) + 2) * (dele_count + 2);
+//                    }
+//                    if ((abs(DetectionArray[i][n].position.x-tmp->position.x) < bd1) &&
+//                        (abs(DetectionArray[i][n].position.y-tmp->position.y) < bd2)) {
+//                        cout<<bd1<<"\t"<<bd2<<endl;
+//                        candidate[m].push_back(n);
+//                    }
+//                }
             }
+           // if (candidate[m].size()!=0)
+                all_can *= (candidate[m].size()+1);
+            cout<<candidate[m].size()<<" ";
         }
+        cout<<endl;
+        cout<<all_can<<" "<<tracklet_num<<" "<<target_num<<endl<<endl;
         plan.assign(tracklet_num,-1);
         one_to_one.assign(target_num,0);
-        hyp_all.assign(0,vector<int>(tracklet_num,-1));
-        generate_all_possibility2(candidate, 0, plan, one_to_one);
+        //hyp_all.assign(0,vector<int>(tracklet_num,-1));
         
-//      generate_all_possibility(target_num,tracklet_num);
-        vector<int> plan(tracklet_num,-1);
-        for (int j = 0; j < hyp_all.size(); ++j)
-        {
-            object_current=compute_gain(DetectionArray[i],hyp_all[j], candidate, i);
-            if (object_current>max_object)
-            {
-                max_object=object_current;
-                
-                optimal_hype=hyp_all[j];
+        simiIndex = new double [target_num*tracklet_num];
+        for (int t1 = 0; t1 <= tracklet_num - 1 ; t1 ++){
+            for (int t2= 0; t2 <= target_num - 1; t2 ++){
+                simiIndex [ t1 * target_num + t2] = correlation_node(&tracklet_pool[t1],&DetectionArray[i][t2]);
             }
         }
+        generate_best_plan(candidate,plan,one_to_one,i);
+//        generate_all_possibility2(candidate, 0, plan, one_to_one);
+//        cout<<int(hyp_all.size())<<endl<<endl;
+//        for (int t1=0;t1<=int(hyp_all.size())-1;t1++){
+//            for (int t2=0;t2<=int(hyp_all[t1].size())-1;t2++)
+//                cout<<hyp_all[t1][t2]<<"\t";
+//            cout<<endl;
+//        }
+//        generate_all_possibility(target_num,tracklet_num);
+        vector<int> plan(tracklet_num,-1);
 
+//        for (int j = 0; j < int(hyp_all.size()); ++j)
+//        {
+//            object_current=compute_gain(DetectionArray[i],hyp_all[j], candidate, i,simiIndex);
+//            if (object_current>max_object)
+//            {
+//                max_object=object_current;
+//                
+//                optimal_hype=hyp_all[j];
+//            }
+//        }
+        optimal_hype = best_plan;
+        delete [] simiIndex;
         for (int k = 0; k < tracklet_num; ++k)
         {
             if (optimal_hype[k]!=-1){
@@ -256,8 +315,8 @@ int main(){
 //        mypause();
 //    }
     std::cout << "\n\n************************* START DRAWING ********************** \n\n" ;
-    vector<vector<int>> trackletindex;
-    vector<vector<int>> pointvarindex;
+    vector<vector<int> > trackletindex;
+    vector<vector<int> > pointvarindex;
     trackletindex.resize(num_frame);
     pointvarindex.resize(num_frame);
     int num_tracklet=(int) all_tracklet.size();
@@ -301,6 +360,27 @@ int main(){
             }
         }
     }
+    std::cout<<"----------------------- Begin Draw --------------------------"<<std::endl;
+    cout<<"Upload direction check: "<<upload_dir<<endl;
+    mkdir(upload_dir.c_str(),00777);
+    string upname = ".txt";
+    string uploadtxt = upload_dir + DS + upname;
+    cout<<"Upload file check: "<<uploadtxt<<endl;
+    ofstream fout(uploadtxt.c_str());
+    for (int i=0;i<=num_frame-1;i++){
+        int tmp_num=(int) trackletindex[i].size();
+        if(tmp_num==0){
+            continue;
+        }
+        else {
+            for (int j=0;j<=tmp_num-1;j++){
+                double* tmp_out;
+                tmp_out = all_tracklet[trackletindex[i][j]].storage[pointvarindex[i][j]]->output();
+                fout<<i+1<<","<<trackletindex[i][j]<<","<< tmp_out[0] <<","<<tmp_out[1]<<","<<tmp_out[2]<<","<<tmp_out[3]<<","<<"-1,-1,-1,-1"<<endl;
+                delete [] tmp_out;
+            }
+        }
+    }
     // ***Print all tracklet data as frame*** //
 //    cout<<"------ Print all tracklet data by frame ------\n\n";
 //    for (int i=0;i<=num_frame-1;i++){
@@ -317,7 +397,6 @@ int main(){
 //        }
 //    }
     // ***END PRINT*** //
-    std::cout<<"----------------------- Begin Draw --------------------------"<<std::endl;
     cout<<"Output direction check: "<<result_img<<endl;
     //mypause();
     cout<<"\n*************************  Output img\n";
@@ -364,7 +443,7 @@ int main(){
             t2.x = x;
             t2.y = y;
             
-            CvScalar s = sVec[index % sVec.size()];
+            CvScalar s = sVec[index % int(sVec.size())];
             rectangle(src, r, s,1);
             
             std::stringstream ss;
