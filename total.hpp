@@ -10,6 +10,7 @@
 #define total_hpp
 
 #include <iostream>
+#include <iomanip>
 #include <cv.h>
 #include <math.h>
 #include <fstream>
@@ -22,6 +23,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv/cvaux.hpp>
 #include <algorithm>
+#include <cmath>
 #include "Vector2.hpp"
 //#include "Matrix.h"
 
@@ -32,12 +34,10 @@
 using namespace cv;
 using namespace std;
 
-/****************************Global Variable Declararion****************************/
-//³õÊ¼»¯¶ÁÈëÊý¾ÝµÄ±ßÔµ
+/**************************** Global Variable Declararion ****************************/
+//boarders
 extern const CvPoint ROI_LeftTop;
 extern const CvPoint ROI_RightDown;
-
-//½øÐÐÊµ¼ÊMCMCËã·¨µÄ±ßÔµ
 extern const CvPoint Border_LeftTop;
 extern const CvPoint Border_RightDown;
 
@@ -72,7 +72,7 @@ extern vector<int> best_plan;
 
 //simiINDEX
 extern double* simiIndex;
-
+extern double* simiEdgeIndex;
 //Variable used in print results, if detections in a tracklet is less than it, not print
 extern int Delete_Less_Than;
 
@@ -81,6 +81,15 @@ extern int GLOBAL_DELETE_BUFFER;
 
 //boundary of the neighbourhood
 extern int bound;
+
+//+1 flag
+extern int complete_flag;
+
+//motion enable
+extern int MOTION_ENABLE;
+
+//tracklet id
+extern int tracklet_id;
 /**********************************End Variable************************************/
 /**********************************************************************************/
 /*****************************Sturcture Declaration********************************/
@@ -100,8 +109,9 @@ public:
     int width, height,frame,id;
     bool Use;
     double* apfeature;
+    int position_id;
     void print(){
-        std::cout<<"Frame:"<<frame<<" ID:"<<id<<" x:"<<position.x<<" y:"<<position.y<<" width:"<<width<<" height:"<<height<<" confidence: "<<trust<<'\n';
+        std::cout<<"Frame:"<<frame<<" ID:"<<id<<" x:"<<position.x<<" y:"<<position.y<<" width:"<<width<<" height:"<<height<<" confidence: "<<trust<<" Position_id: "<<position_id<<'\n';
     }
     void drawprint(){
         std::cout<<"Frame:"<<frame<<" x:"<<position.x-width/2<<" y:"<<position.y-height/2<<" width:"<<width<<" height:"<<height<<'\n';
@@ -141,6 +151,24 @@ public:
     }
     
 };
+//Edgetype structure
+class Edge_type_class{
+public:
+    int type;
+    Vector2<double> pa;
+    Edge_type_class(int t1){
+        type = t1;
+        pa.x = 0;
+        pa.y = 0;
+    }
+    Edge_type_class(int t1, Vector2<double> p1){
+        type = t1;
+        pa = p1;
+    }
+    void print(){
+        cout<<type<<"/"<<pa.x<<"/"<<pa.y<<"\t";
+    }
+};
 //Tracklet Structure
 class tracklet{
 public:
@@ -149,14 +177,35 @@ public:
     Vector2<double> velocity;
     std::vector <PointVar*> storage;
     std::vector<double> relation;
+    std::vector<Edge_type_class> edgeType;
+    std::vector<double> edgeWeights;
     double lambda1;
     double lambda2;
+    int id;
 public:
     //double current_app[1024];
+    double area;
+    double tracklet_weight;
     tracklet();
     tracklet(PointVar *target);
     //~tracklet();
 };
+class tmp_sort{
+public:
+    int index;
+    int x;
+    tmp_sort(int index1, int x1){
+        index = index1;
+        x = x1;
+    }
+    bool operator >(const tmp_sort& Pinfo) const{
+        return x>Pinfo.x;
+    }
+    bool operator <(const tmp_sort& Pinfo) const{
+        return x<Pinfo.x;
+    }
+};
+
 //DetectionArray saving all detections
 extern std::vector<std::vector<PointVar> > DetectionArray;
 //Current tracklets

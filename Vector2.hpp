@@ -19,6 +19,7 @@ public:
     Vector2 operator+(const Vector2 &right) const;
     Vector2 operator-(const Vector2 &right) const;
     Vector2 operator*(const Vector2 &right) const;
+    Vector2 operator*(const int &right) const;
     Vector2 operator/(const Vector2 &right) const;
     Vector2& operator+=(const Vector2 &right);
     Vector2& operator-=(const Vector2 &right);

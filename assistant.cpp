@@ -104,8 +104,22 @@ double CoAppearance(tracklet *pre,PointVar *next){
     }
     //totalsum /= 1024;
     totalsum /= sqrt(sum1*sum2);
-    //cout<<"app:"<<totalsum<<endl;
-    return totalsum;
+    double angle_difference = acos(totalsum);
+    double tmp_return = exp(-abs(angle_difference)*3);
+//    if (pre->id == 26 && pre->storage[trackletsize-1]->frame == 2223){
+//        pre->tracklet_weight = 2;
+//    }
+//    if (pre->id == 29 && pre->storage[trackletsize-1]->frame == 2223){
+//        pre->tracklet_weight = 2;
+//    }
+    tmp_return *= pre->tracklet_weight;
+    //totalsum = 4*totalsum - 2.6;
+    //totalsum *= pre->tracklet_weight;
+    //cout<<"cos: "<<totalsum<<' '<<"app: "<<tmp_return<<endl;
+//    if (tmp_return < 0.1) {
+//        return (10 * tmp_return - 1);
+//    }
+    return tmp_return;
 }
 //double CalcNodeAppearance(const Rect *preR,int FrameNum1,const Rect *nextR,int FrameNum2){
 //    if(!isRectInBorder(preR) || !isRectInBorder(nextR))	//if not inborder, than return
@@ -190,7 +204,7 @@ double correlation_motion(tracklet *track,PointVar *candidate){
     
     p1 = vector1 + (p1 - vector1)/(track->storage[scale-3]->frame - track->storage[scale-4]->frame);
     p2 = vector1 + (p2 - vector1)/(track->storage[scale-2]->frame - track->storage[scale-3]->frame);
-    vector1 = (p1 + p2 + vector1)/3;
+    vector1 = (p1 + p2 + vector1)/3.0;
     vector2 = candidate->position;
     vector2 = (vector2-vector1)/(candidate->frame-tmp->frame);
     velocity_dif = vector2 - velocity;
@@ -198,11 +212,11 @@ double correlation_motion(tracklet *track,PointVar *candidate){
         result=0;
     else{
         double angle_dif = Vector2<double>::dotProduct(velocity,vector2)/(velocity.absolute()*vector2.absolute());
-//        if (angle_dif<0)
-//            result = angle_dif * double(velocity_dif.absolute());
-//        else
-//            result = angle_dif / double(velocity_dif.absolute());
-        result = (angle_dif+1)/2;
+        if (angle_dif<0)
+            result = angle_dif * double(velocity_dif.absolute());
+        else
+            result = angle_dif / double(velocity_dif.absolute());
+       // result = (angle_dif+1)/2;
         //cout<<angle_dif<<endl;
     }
     return result;
@@ -219,8 +233,13 @@ double correlation_node(tracklet *track, PointVar *candidate){
     
     simi_app=CoAppearance(track,candidate);
     
-  //  result=track->lambda1*simi_motion+track->lambda2*simi_app;
-    result=simi_app;
+    if (MOTION_ENABLE == 1){
+        result=track->lambda1*simi_motion+track->lambda2*simi_app;
+    }
+    else if (MOTION_ENABLE ==0){
+        result=simi_app;
+    }
+
 //    cout<<"\t\t"<<"simi_all: "<<result<<endl;
 //    cout<<simi_motion<<"\t"<<simi_app<<"\n";
     return result;
@@ -248,7 +267,6 @@ void update_relation(std::vector<tracklet> &tracklet_pool){
                 target4=tracklet_pool[j].storage[num2-1];
                 correlation=compute_distance_variation(target1,target2,target3,target4);
                 
-                //ÕâÀï¿ÉÒÔÔÙÉÌÈ¶
                 if (correlation>=edge_threshold){
                     tracklet_pool[i].relation[j]-=1;
                     tracklet_pool[j].relation[i]-=1;
@@ -264,22 +282,191 @@ void update_relation(std::vector<tracklet> &tracklet_pool){
     }
     return;
 }
-double compute_distance_variation(const PointVar *tracklet1_a,const PointVar *tracklet1_b,const PointVar *tracklet2_a,const PointVar *tracklet2_b){
-    if (tracklet1_a->frame!=tracklet2_a->frame || tracklet1_b->frame!=tracklet2_b->frame) {
-        return 0;
+void update_edgetype(std::vector<tracklet> &tracklet_pool,int frame){
+    int scale=(int)tracklet_pool.size();
+    int num1, num2, frame1, frame2;
+    if (scale == 0) return;
+    for (int i = 0; i <= scale - 1; i++){
+        for (int j = 0; j <= i - 1; j++){
+            num1=(int)tracklet_pool[i].storage.size();
+            num2=(int)tracklet_pool[j].storage.size();
+            Vector2<double> speed1, speed2, location1, location2;
+            double width1, height1, width2, height2;
+            speed1 = tracklet_pool[i].velocity;
+            speed2 = tracklet_pool[j].velocity;
+            frame1 = tracklet_pool[i].storage[num1-1]->frame;
+            frame2 = tracklet_pool[j].storage[num2-1]->frame;
+            location1 = tracklet_pool[i].storage[num1-1]->position;
+            location2 = tracklet_pool[j].storage[num2-1]->position;
+            width1 = tracklet_pool[i].storage[num1-1]->width;
+            height1 = tracklet_pool[i].storage[num1-1]->height;
+            width2 = tracklet_pool[j].storage[num2-1]->width;
+            height2 = tracklet_pool[j].storage[num2-1]->height;
+            if (tracklet_pool[i].velocity.absolute() == 0 || tracklet_pool[j].velocity.absolute() == 0){
+                if (abs(location1.x - location2.x) < (width1 + width2)*1 && abs(location1.y - location2.y) <(width1+width2)*1){
+                    tracklet_pool[i].edgeType[j].type = 1;
+                    tracklet_pool[j].edgeType[i].type = 1;
+                    continue;
+                }
+                tracklet_pool[i].edgeType[j].type = -1;
+                tracklet_pool[j].edgeType[i].type = -1;
+                continue;
+            }
+//            if (tracklet_pool[j].id == 79 && tracklet_pool[i].id == 81 && tracklet_pool[i].storage[num1-1]->frame == 1719){
+//                cout<<tracklet_pool[j].storage[num2-1]->frame;
+//            }
+            if (num1 >= 2 && num1>=2){
+                double speed_variation = Vector2<double>::dotProduct(speed1, speed2)/(speed2.absolute() * speed1.absolute());
+                double speed_abs_va = abs(speed1.absolute() / speed2.absolute());
+                Vector2<double> relative_velcity = speed1 - speed2;
+                Vector2<double> relative_position = location2 - location1;
+                double oreantation = Vector2<double>::dotProduct(relative_velcity, relative_position)/(relative_velcity.absolute() * relative_position.absolute());
+                // -1 not connected, 1 group, 0 occlusion, 2 getting closer, 3 getting away
+                if (abs(location1.x - location2.x) < (width1 + width2) * 1.5 && abs(location1.y - location2.y) <(width1+width2)*1.5 && speed_variation >= 0.75 && speed_abs_va <= 1.5 && speed_abs_va >= 0.67) {
+                    tracklet_pool[i].edgeType[j].type = 1;
+                    tracklet_pool[j].edgeType[i].type = 1;
+                }
+                else if(abs(location1.x - location2.x) < (width1 + width2)/2 && abs(location1.y - location2.y) <(width1+width2)/2 && tracklet_pool[i].edgeType[j].type == 2){
+                    tracklet_pool[i].edgeType[j].type = 1;
+                    tracklet_pool[j].edgeType[i].type = 1;
+                }
+                else if(abs(location1.x - location2.x) < (width1 + width2) * 3 && abs(location1.y - location2.y) <(width1 + width2) * 3 /*&& speed_variation <= -0.8*/ && oreantation >= 0.5 && tracklet_pool[i].edgeType[j].type != 3){
+                    tracklet_pool[i].edgeType[j].type = 2;
+                    tracklet_pool[j].edgeType[i].type = 2;
+                    tracklet_pool[i].edgeType[j].pa = speed1 * (frame - frame1 + 1) - speed2 * (frame - frame2 + 1);
+                    tracklet_pool[j].edgeType[i].pa = speed2 * (frame - frame2 + 1) - speed1 * (frame - frame1 + 1);
+                }
+                else if(abs(location1.x - location2.x) < (width1 + width2) * 3 && abs(location1.y - location2.y) <(width1 + width2) * 3 /*&& speed_variation <= -0.8*/ && oreantation <= -0.5){
+                    tracklet_pool[i].edgeType[j].type = 3;
+                    tracklet_pool[j].edgeType[i].type = 3;
+                    tracklet_pool[i].edgeType[j].pa = speed1 * (frame - frame1 + 1) - speed2 * (frame - frame2 + 1);
+                    tracklet_pool[j].edgeType[i].pa = speed2 * (frame - frame2 + 1) - speed1 * (frame - frame1 + 1);
+                }
+                else if(abs(location1.x - location2.x) >= (width1 + width2) * 2){
+                    tracklet_pool[i].edgeType[j].type = -1;
+                    tracklet_pool[j].edgeType[i].type = -1;
+                }
+            }
+            else {
+                tracklet_pool[i].edgeType[j].type = -1;
+                tracklet_pool[j].edgeType[i].type = -1;
+            }
+        }
     }
+    //if ()
+}
+
+void update_edge_node_weight(std::vector<tracklet> &tracklet_pool,std::vector<PointVar> &detection){
+    int size=(int)tracklet_pool.size();
+    PointVar* target_tmp, *target_tmp2, *target1_track2, *target2_track2;
+    
+    //compute the node gain
+    for (int i = 0; i < size; ++i){
+        if (best_plan[i] == -1){
+            tracklet_pool[i].tracklet_weight /= 1.1;
+            for (int j = 0; j < i; j ++ ) {
+                if (tracklet_pool[i].edgeType[j].type != -1){
+                    tracklet_pool[i].edgeWeights[j] /= 1.1;
+                    tracklet_pool[j].edgeWeights[i] /= 1.1;
+                }
+            }
+        }
+        else if (best_plan[i]!= -1){
+            target_tmp=tracklet_pool[i].storage.back();
+            target_tmp2=&detection[best_plan[i]];
+            
+            //Node similarity calculation (using index to speed up)!
+            double appearance_similaruty = simiIndex[i*(int(detection.size()))+best_plan[i]];
+            //cout<<"appearance_similaruty: "<<appearance_similaruty<<endl;
+            tracklet_pool[i].tracklet_weight = sigmoid(tracklet_pool[i].tracklet_weight - 1 + (appearance_similaruty - 0.2) * 5, 0, -1,2);
+            //Edge similarity
+            for (int j = 0 ; j < i; j ++) {
+                if (tracklet_pool[i].edgeType[j].type != -1 && best_plan[j] != -1) {
+                    int type = tracklet_pool[i].edgeType[j].type;
+                    target1_track2=tracklet_pool[j].storage.back();
+                    target2_track2=&detection[best_plan[j]];
+                    double edge_similarity = compute_distance_variation_version2(target_tmp, target_tmp2, target1_track2,target2_track2, type);
+                    //cout<<edge_similarity;
+                    if (edge_similarity != -2){
+                        tracklet_pool[i].edgeWeights[j] = sigmoid(tracklet_pool[i].edgeWeights[j] - 1 + (edge_similarity - 0.5) * 5, 0, -1,2);
+                        tracklet_pool[j].edgeWeights[i] = tracklet_pool[i].edgeWeights[j];
+                        //cout<<"edge_similarity: "<<edge_similarity<<endl;
+                    }
+                }
+                else if (tracklet_pool[i].edgeType[j].type != -1 && best_plan[j] == -1) {
+                    tracklet_pool[i].edgeWeights[j] /= 1.1;
+                    tracklet_pool[j].edgeWeights[i] /= 1.1;
+                }
+            }
+        }
+    }
+}
+//1_a and 2_a belong to the previous frame, 1_b and 2_b belong to the present frame
+//1_a will be linked to 2_a, 1_b will be linked to 2_b
+double compute_distance_variation_version2(const PointVar *tracklet1_a,const PointVar *tracklet1_b,const PointVar *tracklet2_a,const PointVar *tracklet2_b, Edge_type_class Edge){
+    double angle_difference, length_difference;
+    double distance1,distance2;
+    Vector2<double> previous = tracklet1_a->position - tracklet2_a->position;
+    Vector2<double> current = tracklet1_b->position - tracklet2_b->position;
+    Vector2<double> various = Edge.pa;
+    if (Edge.type == 2 || Edge.type == 3){
+        previous = previous + various;
+    }
+    angle_difference = Vector2<double>::dotProduct(previous,current)/(previous.absolute()*current.absolute());
+    if (angle_difference>1){
+        angle_difference = 0.9999;
+    }
+    double angle = acos(angle_difference);
+    length_difference = current.absolute() - previous.absolute();
+    //angle_difference = 1 / 2.0 * angle_difference + 1 / 2.0;
+    //1 group, 0 occlusion, 2 getting closer, 3 getting away
+    double tmp_gain;
+    double denu = (tracklet1_a->width + tracklet2_a->width)/2;
+    if (Edge.type == 1){
+        tmp_gain = exp(-abs(length_difference)/(denu)) * exp(-abs(angle)*3);
+    }
+    else if (Edge.type == 0){
+        tmp_gain = -2;
+        return tmp_gain;
+    }
+    else if (Edge.type == 2){
+        if (length_difference <= 0){
+            //tmp_gain = exp(-abs(angle)*3);
+            tmp_gain = exp(-abs(length_difference)/(denu)) * exp(-abs(angle)*3);
+        }
+        else
+            tmp_gain = exp(-abs(length_difference)/(denu)) * exp(-abs(angle)*3);
+    }
+    else if (Edge.type == 3){
+        if (length_difference >= 0)
+            //tmp_gain = exp(-abs(angle)*3);
+            tmp_gain = exp(-abs(length_difference)/(denu)) * exp(-abs(angle)*3);
+        else
+            tmp_gain = exp(-abs(length_difference)/(denu)) * exp(-abs(angle)*3);
+    }
+    
+    if (tmp_gain < 0.1) {
+        return -1;
+    }
+    //cout<<tmp_gain<<endl;
+    return tmp_gain;
+}
+double compute_distance_variation(const PointVar *tracklet1_a,const PointVar *tracklet1_b,const PointVar *tracklet2_a,const PointVar *tracklet2_b){
+//    if (tracklet1_a->frame!=tracklet2_a->frame || tracklet1_b->frame!=tracklet2_b->frame) {
+//        return 0;
+//    }
     
     double difference;
     double distance1,distance2;
     Vector2<double> previous=tracklet1_a->position-tracklet2_a->position;
     Vector2<double> current=tracklet1_b->position-tracklet2_b->position;
-    difference=Vector2<double>::dotProduct(previous,current)/(previous.absolute()*current.absolute());
+    difference = Vector2<double>::dotProduct(previous,current)/(previous.absolute()*current.absolute());
 //    cout<<difference<<endl;
     return difference;
 }
 void update_velocity(tracklet *track){
     int size=(int)track->storage.size();
-    if (size == 1) return;
+    if (size <= 6) return;
     if (size <= 6) {
         track->velocity = (track->storage[size-1]->position - track->storage[0]->position) / (track->storage[size-1]->frame - track->storage[0]->frame);
         return;
@@ -300,7 +487,7 @@ void update_velocity(tracklet *track){
     position_queue[5] = position_queue[4] + (position_queue[5] - position_queue[4])/(track->storage[size-4]->frame - track->storage[size-5]->frame);
     
     
-    track->velocity=((position_queue[0]+position_queue[1]+position_queue[2])/3-(position_queue[3]+position_queue[4]+position_queue[5])/3)/(track->storage[size-2]->frame-track->storage[size-5]->frame);
+    track->velocity=((position_queue[0]+position_queue[1]+position_queue[2])/3.0-(position_queue[3]+position_queue[4]+position_queue[5])/3.0)/(track->storage[size-2]->frame-track->storage[size-5]->frame);
     //cout<<track->velocity<<endl;
     return;
 }
@@ -311,9 +498,18 @@ void update_velocity(tracklet *track){
 //        track->current_app[i] = (track->storage[size-1]->apfeature[i]+track->storage[size-2]->apfeature[i]+track->storage[size-3]->apfeature[i])/3;
 //    }
 //}
+void update_area(tracklet *track){
+    int framenum = int(track->storage.size());
+    if (framenum == 1)
+        track->area = track->storage[0]->height * track->storage[0]->width;
+    else{
+        track->area = (track->area * (framenum-1) + track->storage[framenum-1]->width * track->storage[framenum-1]->height)/framenum;
+    }
+}
 void add_P2T(tracklet *track, PointVar *newdetection){
     track->storage.push_back(newdetection);
     update_velocity(track);
+   // update_area(track);
    // update_appearance(track);
 }
 //int cnt_tracklet(Matrix *hypothesis){
@@ -480,25 +676,75 @@ double compute_gain(std::vector<PointVar> &detection,vector<int> &plan,
             double tmp1=target_tmp->position.x;
             double tmp2=target_tmp2->position.x;
             
+            //Node similarity calculation (using index to speed up)!
             //gain+=correlation_node(&tracklet_pool[i],&detection[plan[i]]);
+            double debug_gain = simiIndex[i*(int(detection.size()))+plan[i]];
             gain+=simiIndex[i*(int(detection.size()))+plan[i]];
-            //            if (frame>340 && frame<355) {
-            //                vector<int>::iterator iter;
-            //                bool flag;
-            //                for (int j=0; j<i; j++) {
-            //                    iter=find(candidate[i].begin(),candidate[i].end(),plan[j]);
-            //                    flag=iter==candidate[i].end()?false:true;
-            //                    if (flag) {
-            //                        target1_track2=tracklet_pool[j].storage.back();
-            //                        target2_track2=&detection[plan[j]];
-            //                        gain+=compute_distance_variation(target_tmp, target_tmp2, target1_track2, target2_track2);
-            //                    }
-            //                }
-            //            }
+            //cout<<"simiIndex: "<<debug_gain<<endl;
             
-            //            if (frame> && frame<){
-            //
-            //            }
+            /*
+            double tmp_gain = 0;
+            int tmp_counting = 0;
+            //frame is the frame before wrong, target_tmp is the previous, target_tmp2 is the present
+            if (frame == 951 && target_tmp->position_id == 1 && target_tmp2->position_id == 1){
+                cout<<"1"<<endl;
+            }
+            //Edge similarity
+            for (int j = 0 ; j < i; j ++) {
+                if (tracklet_pool[i].edgeType[j].type != -1 && plan[j] != -1) {
+                    Edge_type_class type = tracklet_pool[i].edgeType[j];
+                    target1_track2=tracklet_pool[j].storage.back();
+                    target2_track2=&detection[plan[j]];
+                    
+                    //i large, j small
+                    if (tracklet_pool[i].id == 270 && tracklet_pool[j].id == 265 && target1_track2->frame == 951){// && target_tmp2->position_id == 3 && target2_track2->position_id == 4 ) {
+                        cout<< target2_track2->frame;
+                    }
+                    
+                    double tmp_return = compute_distance_variation_version2(target_tmp, target_tmp2, target1_track2,target2_track2, type);
+                    //cout<< tmp_return<<endl;
+                    if (tmp_return != -2) {
+                        
+                        // i large, j small
+//                        if (tracklet_pool[i].id == 52 && tracklet_pool[j].id == 51 && target1_track2->frame == 2690) {
+//                            tracklet_pool[i].edgeWeights[j] = 2;
+//                        }
+//                        if (tracklet_pool[i].id == 57 && tracklet_pool[j].id == 51 && target1_track2->frame == 2690){
+//                            tracklet_pool[i].edgeWeights[j] = 2;
+//                        }
+//                        if (tracklet_pool[i].id == 56 && tracklet_pool[j].id == 51 && target1_track2->frame == 2690){
+//                            tracklet_pool[i].edgeWeights[j] = 2;
+//                        }
+                        
+                        
+                        tmp_gain += tmp_return * tracklet_pool[i].edgeWeights[j];
+                        //cout<<"tmp_return: "<<tmp_return<<endl;
+                        tmp_counting ++;
+                    }
+                }
+            }
+            if (tmp_counting != 0){
+               // cout << tmp_gain/tmp_counting << " " << tmp_gain << " " << tmp_counting << endl;
+                tmp_counting = 1;
+                gain += tmp_gain/tmp_counting;
+            }
+            */
+            
+//            if (frame>0) {
+//                vector<int>::iterator iter;
+//                bool flag;
+//                for (int j=0; j<i; j++) {
+//                    iter=find(candidate[i].begin(),candidate[i].end(),plan[j]);
+//                    flag=iter==candidate[i].end()?false:true;
+//                    if (flag) {
+//                        target1_track2=tracklet_pool[j].storage.back();
+//                        target2_track2=&detection[plan[j]];
+//                        gain+=(compute_distance_variation(target_tmp, target_tmp2, target1_track2, target2_track2))/int(candidate.size());
+//                        //cout<<compute_distance_variation(target_tmp, target_tmp2, target1_track2, target2_track2)<<endl;
+//                    }
+//                }
+//            }
+
             //This is the correlation of the edge
             //            target1=tracklet_pool[i].storage.back();
             //            target2=&detection[plan[i]];
@@ -513,6 +759,7 @@ double compute_gain(std::vector<PointVar> &detection,vector<int> &plan,
         }
     }
     
+    //cout<<gain<<endl;
     return gain;
 }
 void generate_best_plan(vector<vector<int> > &candidate,vector<int> &plan,vector<int> one_to_one,int trackletID){
@@ -539,8 +786,10 @@ void generate_all_possibility2(vector<vector<int> > &candidate,
     else{
         for (int i=0; i<int(candidate[pos].size())+1; i++) {
             if (i == candidate[pos].size()) {
-                plan[pos]=-1;
-                generate_all_possibility2(candidate, pos+1,plan, one_to_one,trackletID);
+                if (complete_flag==1){
+                    plan[pos]=-1;
+                    generate_all_possibility2(candidate, pos+1,plan, one_to_one,trackletID);
+                }
             }
             else {
                 if (one_to_one[candidate[pos][i]]==0) {
@@ -642,12 +891,16 @@ void generate_all_possibility2(vector<vector<int> > &candidate,
 //}
 
 void global_push(tracklet &tmp){
-    tracklet_pool.push_back(tmp);
     for (int i = 0; i < (int)tracklet_pool.size(); ++i)
     {
         //It is reasonable to assume there is no reltion between two targets without evidence
         tracklet_pool[i].relation.push_back(0);
+        Edge_type_class tmp(-1);
+        tracklet_pool[i].edgeType.push_back(tmp);
+        //cout<<tracklet_pool.size()<<"\t"<<tracklet_pool[i].edgeType.size()<<endl;
+        tracklet_pool[i].edgeWeights.push_back(1);
     }
+    tracklet_pool.push_back(tmp);
 }
 int global_delete(int k){
     if (++tracklet_pool[k].delete_counting > GLOBAL_DELETE_BUFFER ){
@@ -655,20 +908,28 @@ int global_delete(int k){
         for (int i = 0; i < (int)tracklet_pool.size(); ++i){
             if ((int)tracklet_pool.size()==0) break;
             vector<double>:: iterator iter=tracklet_pool[i].relation.begin();
-            iter+=k;
+            iter += k;
             tracklet_pool[i].relation.erase(iter);
+            
+            vector<Edge_type_class>:: iterator iter1=tracklet_pool[i].edgeType.begin();
+            iter1 += k;
+            tracklet_pool[i].edgeType.erase(iter1);
+            
+            vector<double>:: iterator iter2=tracklet_pool[i].edgeWeights.begin();
+            iter2 += k;
+            tracklet_pool[i].edgeWeights.erase(iter2);
         }
-        vector<tracklet>::iterator iter1=tracklet_pool.begin();
-        iter1+=k;
-        tracklet_pool.erase(iter1);
+        vector<tracklet>::iterator iter3=tracklet_pool.begin();
+        iter3+=k;
+        tracklet_pool.erase(iter3);
         return 1;
     }
     else return 0;
 }
-double sigmoid(double x,double a,double b){
+double sigmoid(double x,double a,double b,double c){
     double denominator;
     denominator=1+exp((x-a)/b);
-    return 1/denominator;
+    return c/denominator;
 }
 void GetScalar(std::vector<CvScalar> &sVec){
     sVec.push_back(CvScalar(0,0,255));

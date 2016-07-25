@@ -20,7 +20,7 @@ void global_push(tracklet &tmp);
 //delete a tracklet near globally(not including the all_tracklet)
 int global_delete(int k);
 //sigmoid function
-double sigmoid(double a,double b,double c);
+double sigmoid(double a,double b,double c,double d);
 //Compute the cost
 double compute_gain(std::vector<PointVar> &detection,vector<int> &plan,
                     vector<vector<int> > &candidate, int frame, double* simiIndex);
@@ -40,11 +40,15 @@ double correlation_motion(tracklet *track,PointVar *candidate);
 double correlation_node(tracklet *track, PointVar *candidate);
 //update edge relation
 void update_relation(std::vector<tracklet> &tracklet_pool);
+void update_edgetype(std::vector<tracklet> &tracklet_pool, int frame);
+void update_edge_node_weight(std::vector<tracklet> &tracklet_pool,std::vector<PointVar> &detection);
 //computer distance difference
 double compute_distance_variation(const PointVar *tracklet1_a,const PointVar *tracklet1_b,const PointVar *tracklet2_a,const PointVar *tracklet2_b);
+double compute_distance_variation_version2(const PointVar *tracklet1_a,const PointVar *tracklet1_b,const PointVar *tracklet2_a,const PointVar *tracklet2_b, Edge_type_class type);
 //updating velocity and appearance
 void update_velocity(tracklet *track);
 void update_appearance(tracklet *track);
+void update_area(tracklet *track);
 //adding a PointVar to a Tracklet
 void add_P2T(tracklet *track, PointVar *newdetection);
 //hypothesis number
@@ -68,7 +72,7 @@ void generate_all_possibility2(vector<vector<int> > &candidate,
 void generate_best_plan(vector<vector<int> > &candidate,vector<int> &plan,vector<int> one_to_one,int trackletID);
 //rectangle color define
 void GetScalar(std::vector<CvScalar> &sVec);
-
+int Relative_position(tracklet* track, int index);
 //*************Testing Functions****************//
 //Test Reading
 void ReadingExam(std::vector<std::vector<PointVar> > &Array,vector<string> &img_list);

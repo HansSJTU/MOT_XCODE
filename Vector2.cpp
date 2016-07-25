@@ -28,6 +28,14 @@ Vector2<T> Vector2<T>::operator*(const Vector2<T> &right) const{
     return temp;
 }
 template<typename T>
+Vector2<T> Vector2<T>::operator*(const int &right) const{
+    Vector2<T> temp(*this);
+    temp.x *= right;
+    temp.y *= right;
+    return temp;
+}
+
+template<typename T>
 Vector2<T> Vector2<T>::operator/(const Vector2<T> &right) const{
     Vector2<T> temp(*this);
     temp /= right;

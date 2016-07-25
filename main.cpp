@@ -24,17 +24,18 @@ using namespace cv;
 // ************ Dataset Predefine *********** //
 //#define Dataset "ADL-Rundle-1"
 //#define Dataset "ADL-Rundle-3"
-//#define Dataset "AVG-TownCentre"
+#define Dataset "AVG-TownCentre"
 //#define Dataset "KITTI-16"
+//#define Dataset "KITTI-19"
 //#define Dataset "ETH-Crossing"
 //#define Dataset "ETH-Jelmoli"
 //#define Dataset "ETH-Linthescher"
-#define Dataset "KITTI-19"
 //#define Dataset "Venice-1"
-//#define Dataset "PETS2009"
+//#define Dataset "PETS09-S2L2"
 //#define Dataset "TUD-Crossing"
 //#define Dataset "canteenres"
 //#define Dataset "tianmuluv5"
+//#define Dataset "zhuangyuange02"
 // ***************** End **************** //
 
 int main(){
@@ -48,33 +49,32 @@ int main(){
     string passp1 = "/Users/";
     string passp2 = "/Desktop/Xcode_MOT/2DMOT2015/test/";
     string passp5 = "/Desktop/Xcode_MOT/Result_IMGs/";
-    string passp8= "/Desktop/Xcode_MOT/Upload/";
+    string passp8 = "/Desktop/Xcode_MOT/Upload/";
     const std::string base_dir = passp1 + UN + passp2 + DS + passp3;
     const std::string data_dir = passp1 + UN + passp2 + DS + passp4;
     const std::string out_dir = passp1 + UN + passp5 + DS + passp6;
     const std::string result_img = passp1 + UN + passp5 + DS + "/";
-    const std::string feature_dir = passp1 + UN +passp2 +DS + passp4 + passp7;
+    const std::string feature_dir = passp1 + UN + passp2 +DS + passp4 + passp7;
     const std::string upload_dir = passp1 + UN + passp8;
 #elif MODE == 1
     string passp1 = "/home/sam/Desktop/Xcode_MOT/2DMOT2015/test/";
     string passp5 = "/home/sam/Desktop/Xcode_MOT/Result_IMGs/";
-    string passp8= "/home/sam/Desktop/Xcode_MOT/Upload/";
+    string passp8 = "/home/sam/Desktop/Xcode_MOT/Upload/";
     const string base_dir = passp1 + DS + passp3;
     const string data_dir = passp1 + DS + passp4;
     const string out_dir = passp5 + DS + passp6;
     const string result_img = passp5 + DS + "/";
     const string feature_dir = passp1 + DS + passp4 + passp7;
-    const std::string upload_dir = passp8;
+    const string upload_dir = passp8;
 #endif
     int start = 1;
-    int totalFrame = 2000;
+    int totalFrame = 3000;
     int PicN = start + totalFrame - 1;
     cout<<"Checking <base_dir>   : "<<base_dir<<endl;
     cout<<"Checking <data_dir>   : "<<data_dir<<endl;
     cout<<"Checking <feature_dir>: "<<feature_dir<<endl;
     //***************** Reading data into memory********************//
     cout<<"\n***************** Reading Data *****************\n";
-    cout<<"\n*************************  Reading det\n";
     std::vector<string> PicArray;
     std::string Txtname, Listname,Imglist;
     Txtname = data_dir+"data.txt";
@@ -86,9 +86,13 @@ int main(){
     int totalframe;			//checking the total frames
     fin_imglist>>totalframe;
     if (PicN>totalframe) {
-        cout<<"Warning in <main:PicN>: Exceeding Frame!\n";mypause();
+        cout<<"Warning in <main:PicN>: Exceeding Frame!\n";
+        //mypause();
+        cout<<"Total frame number has been set to: ";
         PicN = totalframe;
+        cout<<PicN<<endl;
     }
+    cout<<"\n*************************  Reading det\n";
     std::vector<int> deleteFrame;
     std::vector<int> deleteID;
     int star_count = 0; //to count print "*"
@@ -104,26 +108,34 @@ int main(){
         tmpstring = base_dir + tmpstring;
         PicArray.push_back(tmpstring);
         std::vector<PointVar> OneDetection;
+        std::vector<tmp_sort> sorting_x;
+        int tmp_index = 0;
         for (int j=0;j<=detection_num-1;j++){
             double x,y,width,height,trust;
             int frame;
             fin_data>>frame>>x>>y>>width>>height>>trust;		//detection data in
             PointVar tmp(frame,x,y,width,height,trust,j);		//construction
             if (!tmp.delete_judge()){       // delete some detections
+                tmp_sort sort_v(tmp_index ++, int(x));
                 OneDetection.push_back(tmp);
+                sorting_x.push_back(sort_v);
             }
             else {
                 deleteFrame.push_back(frame);
                 deleteID.push_back(j);
             }
         }
+        sort(sorting_x.begin(), sorting_x.end());
+        for (int l = 0; l <= int(sorting_x.size()) - 1; l ++ ){
+            OneDetection[sorting_x[l].index].position_id = l+1;
+        }
         DetectionArray.push_back(OneDetection);
     }
-    cout<<"  Finished";
+    cout<<"  Finished\n";
     fin_data.close();
     fin_list.close();
-    //ReadingExam(DetectionArray,PicArray);
-    //mypause();
+   // ReadingExam(DetectionArray,PicArray);
+   // mypause();
     cout<<"\n*************************  Reading features\n";
     star_count = 0;
     int delete_count = 0;
@@ -139,7 +151,7 @@ int main(){
             feature_tmp=new double[1024];
             int checkframe,checkid;
             feature>>checkframe>>checkid;
-            if (checkframe == deleteFrame[delete_count] && checkid == deleteID[delete_count]) {
+            if (deleteFrame.size() != 0 && checkframe == deleteFrame[delete_count] && checkid == deleteID[delete_count]) {
                 j--;
                 delete_count++;
                 for (int i_tp = 0; i_tp <= 1023; i_tp ++){
@@ -206,36 +218,47 @@ int main(){
             int dele_count = tracklet_pool[m].delete_counting;
             
             for (int n=0; n<target_num; n++) {
-                if ((abs(DetectionArray[i][n].position.x-tmp->position.x)<tmp->width*0.5) && (abs(DetectionArray[i][n].position.y-tmp->position.y)<tmp->width*0.5)) {
-                    candidate[m].push_back(n);
+                double area1 = double(DetectionArray[i][n].width*DetectionArray[i][n].height);
+                double area2 = tmp->width * tmp->height;
+                //cout<<area1<<"\t"<<area2<<endl;
+                if (MOTION_ENABLE == 0){
+                    if ((abs(DetectionArray[i][n].position.x-tmp->position.x)<tmp->width*1.5) && (abs(DetectionArray[i][n].position.y-tmp->position.y)<tmp->width*1.5) && (area1/area2>0.3 && area1/area2<3.3))
+                    {
+                        candidate[m].push_back(n);
+                    }
                 }
                 //This is for linking the people according to the speed
-//                Vector2<double> Track_v = tracklet_pool[m].velocity;
-//                if (Track_v.absolute() == 0) {
-//                    if ((abs(DetectionArray[i][n].position.x-tmp->position.x)<bound+5*dele_count) &&
-//                            (abs(DetectionArray[i][n].position.y-tmp->position.y)<bound+5*dele_count)) {
-//                        candidate[m].push_back(n);
-//                    }
-//                }
-//                else {
-//                    double bd1,bd2;
-//                    if (dele_count==0){
-//                        bd1 = 15 + 2 * abs(Track_v.x);
-//                        bd2 = 15 + 2 * abs(Track_v.y);
-//                    }
-//                    else {
-//                        bd1 = 15 + (abs(Track_v.x) + 2) * (dele_count + 2);
-//                        bd2 = 15 + (abs(Track_v.y) + 2) * (dele_count + 2);
-//                    }
-//                    if ((abs(DetectionArray[i][n].position.x-tmp->position.x) < bd1) &&
-//                        (abs(DetectionArray[i][n].position.y-tmp->position.y) < bd2)) {
-//                        cout<<bd1<<"\t"<<bd2<<endl;
-//                        candidate[m].push_back(n);
-//                    }
-//                }
+                else if (MOTION_ENABLE == 1) {
+                    Vector2<double> Track_v = tracklet_pool[m].velocity;
+                    if (Track_v.absolute() == 0) {
+                        if ((abs(DetectionArray[i][n].position.x-tmp->position.x)<tmp->width*1+1*dele_count) &&
+                                (abs(DetectionArray[i][n].position.y-tmp->position.y)<width*1+1*dele_count)) {
+                            candidate[m].push_back(n);
+                        }
+                    }
+                    else {
+                        double bd1,bd2;
+                        if (dele_count==0){
+                            bd1 = 15 + 2 * abs(Track_v.x);
+                            bd2 = 15 + 2 * abs(Track_v.y);
+                        }
+                        else {
+                            bd1 = 15 + (abs(Track_v.x) + 2) * (dele_count + 2);
+                            bd2 = 15 + (abs(Track_v.y) + 2) * (dele_count + 2);
+                        }
+                        if ((abs(DetectionArray[i][n].position.x-tmp->position.x) < bd1) &&
+                            (abs(DetectionArray[i][n].position.y-tmp->position.y) < bd2)) {
+                            candidate[m].push_back(n);
+                        }
+                    }
+                }
             }
-           // if (candidate[m].size()!=0)
+            if (complete_flag==1)
                 all_can *= (candidate[m].size()+1);
+            else if (complete_flag==0){
+                if (candidate[m].size()!=0)
+                    all_can *= (candidate[m].size());
+            }
             cout<<candidate[m].size()<<" ";
         }
         cout<<endl;
@@ -250,6 +273,15 @@ int main(){
                 simiIndex [ t1 * target_num + t2] = correlation_node(&tracklet_pool[t1],&DetectionArray[i][t2]);
             }
         }
+//        int posibility1, posibility2;
+//        posibility1 = tracklet_num * (tracklet_num - 1) / 2;
+//        posibility2 = target_num * (target_num -1) / 2;
+//        simiEdgeIndex = new double [posibility1 * posibility2];
+//        for (int t1 = 0; t1 <= posibility1 - 1; t1 ++){
+//            for (int t2 = 0; t2 <= posibility2 -1; t2 ++){
+//                
+//            }
+//        }
         generate_best_plan(candidate,plan,one_to_one,i);
 //        generate_all_possibility2(candidate, 0, plan, one_to_one);
 //        cout<<int(hyp_all.size())<<endl<<endl;
@@ -272,6 +304,9 @@ int main(){
 //            }
 //        }
         optimal_hype = best_plan;
+        
+        //update_edge_node_weight(tracklet_pool,DetectionArray[i]);
+        
         delete [] simiIndex;
         for (int k = 0; k < tracklet_num; ++k)
         {
@@ -298,6 +333,50 @@ int main(){
             }
         }
         delete []target_link_flag;
+        
+        //update_edgetype(tracklet_pool,i+1);
+        cout<<"Vertex Weights:\n";
+        for (int l = 0; l <= int(tracklet_pool.size()) - 1; l ++) {
+            cout << tracklet_pool[l].id << "\t\t " ;
+        }
+        cout<<endl;
+        for (int l = 0; l <= int(tracklet_pool.size() - 1); l ++) {
+            cout << setprecision(2) << std::fixed << tracklet_pool[l].tracklet_weight << "\t\t";
+        }
+        cout<<endl<<endl;
+        
+        cout<<"Edge Weights:\n";
+        for (int m = 0; m <= int(tracklet_pool.size()) - 1; m ++){
+            cout<<tracklet_pool[m].id<<"\t";
+        }
+        cout<<endl<<endl;
+        for (int l = 0; l <= int(tracklet_pool.size()) - 1; l ++){
+            for (int m = 0; m <= int(tracklet_pool[l].edgeType.size()) - 1; m++) {
+                cout<<setprecision(2) << std::fixed <<tracklet_pool[l].edgeWeights[m]<<"\t";
+            }
+            int last = int(tracklet_pool[l].storage.size()) - 1;
+            if (last >= 0)
+                //cout<<"Frame: "<<tracklet_pool[l].storage[last]->frame<<"\t position: "<<tracklet_pool[l].storage[last]->position_id;
+                cout<<"ID:  "<<tracklet_pool[l].id;
+            cout<<endl<<endl;
+        }
+        cout<<endl;
+        
+        cout<<"Edge Types:\n";
+        for (int m = 0; m <= int(tracklet_pool.size()) - 1; m ++){
+            cout<<tracklet_pool[m].id<<"\t\t";
+        }
+        cout<<endl<<endl;
+        for (int l = 0; l <= int(tracklet_pool.size()) - 1; l ++){
+            for (int m = 0; m <= int(tracklet_pool[l].edgeType.size()) - 1; m++) {
+                cout<<tracklet_pool[l].edgeType[m].type<<"/"<<tracklet_pool[l].edgeType[m].pa<<"\t";
+            }
+            int last = int(tracklet_pool[l].storage.size()) - 1;
+            if (last >= 0)
+                //cout<<"Frame: "<<tracklet_pool[l].storage[last]->frame<<"\t position: "<<tracklet_pool[l].storage[last]->position_id;
+                cout<<"ID:  "<<tracklet_pool[l].id;
+            cout<<endl<<endl;
+        }
     }
     
     int final_trackletpoolsize=(int) tracklet_pool.size();
@@ -348,6 +427,17 @@ int main(){
             }
         }
     }
+    
+//    for (int i = 0;i <= num_tracklet-1;i++){
+//        int tmp_num=(int)all_tracklet[i].storage.size();
+//        if (all_tracklet[i].printbool==1){
+//            for (int j = 5;j <= tmp_num ;j+=5){
+//                if ()
+//            }
+//        }
+//    }
+    
+    
     for (int i = 0;i <= num_tracklet-1;i++){
         if (num_tracklet==0) {cout<<"ERROR in <main>: Tracklet number=0!\n"; mypause(); break;}
         int tmp_num=(int)all_tracklet[i].storage.size();
@@ -398,7 +488,7 @@ int main(){
 //    }
     // ***END PRINT*** //
     cout<<"Output direction check: "<<result_img<<endl;
-    //mypause();
+    mypause();
     cout<<"\n*************************  Output img\n";
     string rm_ins = "rm -r ";
     rm_ins = rm_ins + result_img;
@@ -427,7 +517,8 @@ int main(){
             height=(int)all_tracklet[trackletindex[i][j]].storage[pointvarindex[i][j]]->height;
             x=(int)(all_tracklet[trackletindex[i][j]].storage[pointvarindex[i][j]]->position.x-width/2);
             y=(int)(all_tracklet[trackletindex[i][j]].storage[pointvarindex[i][j]]->position.y-height/2);
-            index=trackletindex[i][j];
+            //index = trackletindex[i][j];
+            index = all_tracklet[trackletindex[i][j]].id;
             // x = (int)((double)x*1.875);
             // y = (int)((double)y*1.875);
             // width = (int)((double)width*1.875);
