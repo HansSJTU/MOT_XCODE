@@ -212,13 +212,19 @@ double correlation_motion(tracklet *track,PointVar *candidate){
         result=0;
     else{
         double angle_dif = Vector2<double>::dotProduct(velocity,vector2)/(velocity.absolute()*vector2.absolute());
-        if (angle_dif<0)
-            result = angle_dif * double(velocity_dif.absolute());
-        else
-            result = angle_dif / double(velocity_dif.absolute());
+        double length_difference = abs(velocity.absolute() - vector2.absolute());
+        double denu = (track->storage[scale-1]->width + candidate->width)/2;
+        double angle_difference = acos(angle_dif);
+        result = exp(-abs(angle_difference)*3) * exp(-abs(length_difference)/(denu));
+        
+//        if (angle_dif<0)
+//            result = angle_dif * double(velocity_dif.absolute());
+//        else
+//            result = angle_dif / double(velocity_dif.absolute());
        // result = (angle_dif+1)/2;
         //cout<<angle_dif<<endl;
     }
+    result = result * track->tracklet_weight;
     return result;
 }
 double correlation_node(tracklet *track, PointVar *candidate){
@@ -234,10 +240,10 @@ double correlation_node(tracklet *track, PointVar *candidate){
     simi_app=CoAppearance(track,candidate);
     
     if (MOTION_ENABLE == 1){
-        result=track->lambda1*simi_motion+track->lambda2*simi_app;
+        result = track->lambda1 * simi_motion + track->lambda2 * simi_app;
     }
     else if (MOTION_ENABLE ==0){
-        result=simi_app;
+        result = simi_app;
     }
 
 //    cout<<"\t\t"<<"simi_all: "<<result<<endl;
@@ -682,7 +688,7 @@ double compute_gain(std::vector<PointVar> &detection,vector<int> &plan,
             gain+=simiIndex[i*(int(detection.size()))+plan[i]];
             //cout<<"simiIndex: "<<debug_gain<<endl;
             
-            /*
+            
             double tmp_gain = 0;
             int tmp_counting = 0;
             //frame is the frame before wrong, target_tmp is the previous, target_tmp2 is the present
@@ -728,7 +734,7 @@ double compute_gain(std::vector<PointVar> &detection,vector<int> &plan,
                 tmp_counting = 1;
                 gain += tmp_gain/tmp_counting;
             }
-            */
+            
             
 //            if (frame>0) {
 //                vector<int>::iterator iter;

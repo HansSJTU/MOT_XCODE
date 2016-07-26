@@ -141,7 +141,7 @@ public:
         delet=false;
         apfeature=NULL;
         //if(width < 10 || height < 10) delet=true;
-        if ((! ((int)x1 > Border_lt.x && (int)x1 < Border_rd.x && (int)y1 > Border_lt.y && (int)y1 < Border_rd.y))|| trust<0.9)
+        if ((! ((int)x1 > Border_lt.x && (int)x1 < Border_rd.x && (int)y1 > Border_lt.y && (int)y1 < Border_rd.y)))// || trust<0.9)
             delet=true;
     }
     PointVar(){}

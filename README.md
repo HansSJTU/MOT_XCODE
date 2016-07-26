@@ -111,7 +111,12 @@ Author: *Hanxiao He*, *Junxian He*
     |Rcll | Prcn |  FAR| GT | MT | PT  |ML|   FP  |  FN | IDs  | FM|  MOTA | MOTP |
     |-----|------|----|----|----|----|----|----|----|-----|----|------|-----|
     |65.3 | 81.0 | 1.62|721 |242| 335 |144| 9385| 21318 |1110| 1841|  48.2 | 74.0 |
-
+    
+* Seminor
+    - Historical imformation. Consider tracklets as some feature as a graph.
+    - Consider the transformation of the graph.
+    - Learning methods
+    - Forming confident tracklets, using these tracklets to apply graph matching.  
 
 
 ##Variable Setting
@@ -150,13 +155,16 @@ Author: *Hanxiao He*, *Junxian He*
     * complete_flag==0
     * GLOBAL_DELETE_BUFFER=5
 
-##Update Version
-####First edition
-1. Edge Type:
+####Second edition
+1. All motion is not enable. 
+2. Width and complete_flag are the same as the first edition.
+3. The results of TUD-Crossing && ADL-Rundle-1 && ADL-Rundle-3 are the same as the First Edition.
+4. Other dataset are involved with the similarity of edges.
+5. Edge Type:
     * 0 (Occlusion):  abs(location1.x - location2.x) < (width1 + width2)/2 && abs(location1.y - location2.y) <(width1+width2)/2 && tracklet_pool[i].edgeType[j] == 2
     * 1 (Group): abs(location1.x - location2.x) < (width1 + width2) * 1.5 && abs(location1.y - location2.y) <(width1+width2)*1.5 && speed_variation >= 0.8 && speed_abs_va <= 1.5 && speed_abs_va >= 0.67
-    * 2 (Closer): abs(location1.x - location2.x) < (width1 + width2) * 2 && abs(location1.y - location2.y) <(width1+width2) * 2 && oreantation >= 0.5 && tracklet_pool[i].edgeType[j] != 3
-    * 3 (Away): abs(location1.x - location2.x) < (width1 + width2) * 2 && abs(location1.y - location2.y) <(width1+width2) * 2 /*&& speed_variation <= -0.8*/ && oreantation <= -0.5
+    * 2 (Closer): abs(location1.x - location2.x) < (width1 + width2) * 3 && abs(location1.y - location2.y) <(width1+width2) * 3 && oreantation >= 0.5 && tracklet_pool[i].edgeType[j] != 3
+    * 3 (Away): abs(location1.x - location2.x) < (width1 + width2) * 3 && abs(location1.y - location2.y) <(width1+width2) * 3 /*&& speed_variation <= -0.8*/ && oreantation <= -0.5
     * -1 (Not involved): abs(location1.x - location2.x) >= (width1 + width2) * 2
 2. Edge weight:
     * sigmoid(tracklet_pool[i].edgeWeights[j] - 1 + (edge_similarity - 0.5) * 5, 0, -1,2)

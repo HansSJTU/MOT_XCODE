@@ -24,7 +24,7 @@ using namespace cv;
 // ************ Dataset Predefine *********** //
 //#define Dataset "ADL-Rundle-1"
 //#define Dataset "ADL-Rundle-3"
-#define Dataset "AVG-TownCentre"
+//#define Dataset "AVG-TownCentre"
 //#define Dataset "KITTI-16"
 //#define Dataset "KITTI-19"
 //#define Dataset "ETH-Crossing"
@@ -34,7 +34,7 @@ using namespace cv;
 //#define Dataset "PETS09-S2L2"
 //#define Dataset "TUD-Crossing"
 //#define Dataset "canteenres"
-//#define Dataset "tianmuluv5"
+#define Dataset "tianmuluv5"
 //#define Dataset "zhuangyuange02"
 // ***************** End **************** //
 
@@ -68,7 +68,7 @@ int main(){
     const string upload_dir = passp8;
 #endif
     int start = 1;
-    int totalFrame = 3000;
+    int totalFrame = 5000;
     int PicN = start + totalFrame - 1;
     cout<<"Checking <base_dir>   : "<<base_dir<<endl;
     cout<<"Checking <data_dir>   : "<<data_dir<<endl;
@@ -121,8 +121,8 @@ int main(){
                 sorting_x.push_back(sort_v);
             }
             else {
-                deleteFrame.push_back(frame);
-                deleteID.push_back(j);
+               // deleteFrame.push_back(frame);
+               // deleteID.push_back(j);
             }
         }
         sort(sorting_x.begin(), sorting_x.end());
@@ -221,8 +221,8 @@ int main(){
                 double area1 = double(DetectionArray[i][n].width*DetectionArray[i][n].height);
                 double area2 = tmp->width * tmp->height;
                 //cout<<area1<<"\t"<<area2<<endl;
-                if (MOTION_ENABLE == 0){
-                    if ((abs(DetectionArray[i][n].position.x-tmp->position.x)<tmp->width*1.5) && (abs(DetectionArray[i][n].position.y-tmp->position.y)<tmp->width*1.5) && (area1/area2>0.3 && area1/area2<3.3))
+                if (MOTION_ENABLE == 1 || MOTION_ENABLE == 0){
+                    if ((abs(DetectionArray[i][n].position.x-tmp->position.x)<tmp->width*1) && (abs(DetectionArray[i][n].position.y-tmp->position.y)<tmp->width*1) && (area1/area2>0.3 && area1/area2<3.3))
                     {
                         candidate[m].push_back(n);
                     }
@@ -305,7 +305,7 @@ int main(){
 //        }
         optimal_hype = best_plan;
         
-        //update_edge_node_weight(tracklet_pool,DetectionArray[i]);
+        update_edge_node_weight(tracklet_pool,DetectionArray[i]);
         
         delete [] simiIndex;
         for (int k = 0; k < tracklet_num; ++k)
@@ -334,7 +334,7 @@ int main(){
         }
         delete []target_link_flag;
         
-        //update_edgetype(tracklet_pool,i+1);
+        update_edgetype(tracklet_pool,i+1);
         cout<<"Vertex Weights:\n";
         for (int l = 0; l <= int(tracklet_pool.size()) - 1; l ++) {
             cout << tracklet_pool[l].id << "\t\t " ;

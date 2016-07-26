@@ -8,11 +8,11 @@
 
 #include "total.hpp"
 /********TownCenter/ADL-1/ADL-3/Venice-1*************/
-const CvPoint ROI_LeftTop(0,0);
-const CvPoint ROI_RightDown(1920,1080);
-
-const CvPoint Border_LeftTop(0,0);
-const CvPoint Border_RightDown(1920,1080);
+//const CvPoint ROI_LeftTop(0,0);
+//const CvPoint ROI_RightDown(1920,1080);
+//
+//const CvPoint Border_LeftTop(0,0);
+//const CvPoint Border_RightDown(1920,1080);
 /********************************/
 
 ///********KITTI16/KITTI19*************/
@@ -24,11 +24,11 @@ const CvPoint Border_RightDown(1920,1080);
 /********************************/
 
 /********Canteenres_5/Tianmu_Road/ETH-Jemoli/ETH-Crossing/ETH-Linthescher/TUD-Crossing*************/
-//const CvPoint ROI_LeftTop(0,0);
-//const CvPoint ROI_RightDown(640,480);
-//
-//const CvPoint Border_LeftTop(0,0);
-//const CvPoint Border_RightDown(640,480);
+const CvPoint ROI_LeftTop(0,0);
+const CvPoint ROI_RightDown(640,480);
+
+const CvPoint Border_LeftTop(0,0);
+const CvPoint Border_RightDown(640,480);
 /********************************/
 
 /********PETS2009*************/
@@ -81,6 +81,8 @@ tracklet::tracklet(PointVar *target):velocity(0),lambda1(0.5),lambda2(0.5)
 
 //const char path[] = "C:\\Users\\Hans\\Desktop\\MCMC_v4\\data\\KITTI-19\\img1\\";
 
+int tracklet_id = 1;
+
 const double edge_threshold=5;
 const double width=1;
 const double translation=0;
@@ -97,14 +99,13 @@ vector<vector<int> > hyp_all;
 int hyp_all_count=0;
 int last_numtmp_hyp=-1;
 
-double max_plan=-10000;
+double max_plan = -10000;
 double* simiIndex = NULL;
 double* simiEdgeIndex = NULL;
 vector<int> best_plan;
 
-int Delete_Less_Than=5;
-int GLOBAL_DELETE_BUFFER=5;
-int bound=30;
-int complete_flag=0;
-int MOTION_ENABLE=0;
-int tracklet_id=1;
+int Delete_Less_Than = 5;
+int GLOBAL_DELETE_BUFFER = 5;
+int bound = 30;
+int complete_flag = 1;
+int MOTION_ENABLE = 1;
